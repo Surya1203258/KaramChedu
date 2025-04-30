@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="200" height="50" viewBox="0 0 200 50" xmlns="http://www.w3.org/2000/svg">
+  <!-- Modern Gavel Design -->
+  <g transform="translate(10, 5)">
+    <!-- Gavel Head -->
+    <path d="M0 0 L20 0 L20 8 L0 8 Z" fill="#3498db"/>
+    <path d="M2 2 L18 2 L18 6 L2 6 Z" fill="#2c3e50"/>
+    
+    <!-- Handle -->
+    <path d="M8 8 L12 8 L12 30 L8 30 Z" fill="#2c3e50"/>
+    
+    <!-- Handle Grip -->
+    <rect x="6" y="15" width="8" height="4" rx="1" fill="#ecf0f1"/>
+    
+    <!-- Sound Block -->
+    <path d="M0 30 L20 30 L20 34 L0 34 Z" fill="#3498db"/>
+    <path d="M2 31 L18 31 L18 33 L2 33 Z" fill="#2c3e50"/>
+    
+    <!-- Impact Effect -->
+    <circle cx="10" cy="30" r="2" fill="#ecf0f1" opacity="0.6"/>
+  </g>
+  
+  <!-- Text -->
+  <g transform="translate(40, 0)">
+    <!-- ArguMentor Text -->
+    <text x="0" y="35" font-family="'Inter', sans-serif" font-size="24" font-weight="700" fill="#2c3e50">
+      <tspan fill="#3498db">Argu</tspan>Mentor
+    </text>
+    
+    <!-- Subtle Line -->
+    <path d="M0 40 L120 40" stroke="#3498db" stroke-width="2" opacity="0.3"/>
+  </g>
+  
+  <!-- Decorative Elements -->
+  <g transform="translate(160, 5)">
+    <!-- Balance Scale -->
+    <path d="M0 0 L10 0 L10 2 L0 2 Z" fill="#3498db" opacity="0.5"/>
+    <path d="M5 2 L5 10" stroke="#2c3e50" stroke-width="1" opacity="0.5"/>
+    <path d="M2 10 L8 10" stroke="#2c3e50" stroke-width="1" opacity="0.5"/>
+  </g>
+</svg> 
