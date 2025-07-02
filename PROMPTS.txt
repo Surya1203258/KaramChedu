@@ -1,0 +1,35 @@
+Prompt 1 for Home Page:
+Once we login, instead of a todo list  take me to a home page of a website
+The website is about a debating competition preparation site. The home page should have a title at the top called "ArguMentor" and it should also have a nav bar with the following menu items: Home, Learn, Evidence, Case Selection, and Forum. The page should also contain a jumbotron with the primary message being "Master debate skills with ArguMentor!", the secondary message being ""Unlock the Power of Persuasion with ArguMentor! Learn the essentials of policy debate and boost your confidence, critical thinking, and speaking skills—right from the start." and the call to action button stating sign up for our regular updates! Keep a nice relevant image as the backdrop, and use a gradient so the text is properly visible on top of it. Choose an appropriate color palette to fit the website theme. Keep the page basic and minimalistic, do not add any fancy frameworks from bootstraps, tailwind, material ui, or etc. However, the CSS should be captured as part of the styles folder. The page should also have a login button in an appropriate place. Dont write any backend code yet, we will integrate that later. Preserve the folder structure of the previous project, do not make any major structural changes.
+
+
+Prompt 2 for Evidence Backend:
+The next step is to make a page to add evidence linked to the Submit Evidence menu item. For the submit evidence page(an evidence is a argument using proper citation in a debate round to argue your case), There will be columns with input options which are Serial Number(auto populated), title, resolution, case, links, and a bigger input for the actual evidence. All the inputs will be right next to the text it is for except the evidence one which would be underneath it and the input would be bigger. All this info will be stored in a document inside a collection named "Evidence" inside the MongoDB database called "ArguMentor". You need to use mongoose to connect to the Database and create an API to make this update. Suggest any other changes required to get the functionality I desire. 
+
+Prompt 3 for Evidence List:
+Create a new page for displaying evidence list in a tabular format. Show only the following fields of evidence: Case first then Title. And also have view, edit, and delete buttons next to the evidence. Clicking on Evidence List menu item should take you to this page. For now, do not add any backend to the view edit and delete buttons. 
+
+Prompt 4 for View Evidence:
+Now in the Evidence List Page, we need to add event handling to the view button. When the view button is clicked, a nicely formatted readable card should display containing all the evidence specifics. You will fetch all the evidence specifics from documents stored in MongoDB. The User should only be able to view it, not be able to edit the evidence.
+
+Prompt 5 for Edit Evidence:
+Now we need to add event handling to the edit button in the Evidence List Page. When the button is clicked, the same format for the modal box for the view evidence button should pop up, but this time the user should be able to edit the fields and components of the evidence. Make the appropriate changes in the front end and backend to reflect the changed evidence if edited. 
+
+Prompt 6 for Case Selection Page:
+Next I want you to create the Case Selection page. First, I want you to have tips and tricks to finding the perfect debate case to use. Then I want you to create a chat area where you chat with a bot. I want you to create the bot allowing the user to chat and gain responses with a nice UI. I want you to use the OpenAI API key in .env.local to power the bot. I want you to also incorporate notes on how to use AI, such as what questions you can ask it and what you can do with the bot to help you with your case. These notes should include pitching it arguementation and getting feedback, asking for possible Affirmative Arguements and Negative responses, and etc. 
+
+Prompt 7 to Split Case Selection Page:
+Create two dropdown options under Case Selection. These two dropdowns should be "Tips and Strategies" and "AI Case Selection Assistant". I want you to seperate the content of the current case selection page into these two seperate pages. I want the tips and strategies to be in the "Tips and Strategies" page. I want the notes on how to use the AI bot and the AI bot assistant itself to be in the "AI Case Selection Assistant". For the AI case selection assistant page, make the AI come first then add the notes.
+
+Prompt 8 for Case Selection Fixes:
+For the AI Case Selection Assistant page under case selection, there are only two cards under the How to use the AI Case Bot Section and it looks off. Add another card to fill the space. Additionally, for the Trips and Strategies page, add two more cards to fill the space. Finally, when you ask something to the AI bot and it gives a response, the entire page scrolls down. Make it that only the AI bot segement scrolls down. 
+
+Prompt 9 for Posts Page:
+Rename Forum in the navbar to community posts. The page should look like the image attatched except no comment option, only like.
+
+Prompt 9 for Community Posts bug fix:
+There are a couple of issues for the community posts page. First, each account should only be allowed to like a post once. Additionally, the icon for each account is not changing. For instance, if I switch google accounts and login, the same SR icon is showing even if I am using the app with a different account. Make sure the icon reflects the intials of the user sending the message, not static for all users.
+
+
+Prompt 10 for firewall for pages:
+I do not want the user to be able to access the following dynamic pages unless they are logged in. The pages are: Submit Evidence, View Evidence,  AI Case Selection Assistant, and Community Posts. Handle it appropriately.

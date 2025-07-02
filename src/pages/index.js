@@ -1,51 +1,23 @@
-import { useSession, signIn, signOut } from "next-auth/react";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/router";
 import styles from '../styles/Home.module.css';
-import Link from 'next/link';
-import Image from 'next/image';
+import Navigation from '../components/Navigation';
 
 export default function Home() {
   const { data: session, status } = useSession();
+  const router = useRouter();
 
   if (status === "loading") {
     return <p>Loading...</p>;
   }
 
+  const handleNewsletterSignup = () => {
+    router.push('/newsletter-signup');
+  };
+
   return (
     <div className={styles.container}>
-      <nav className={styles.navbar}>
-        <Link href="/" className={styles.logoContainer}>
-          <Image
-            src="/West Umbria High (1).png"
-            alt="West Umbria High Logo"
-            width={40}
-            height={40}
-            className={styles.logoImage}
-          />
-          <span className={styles.logoText}>ArguMentor</span>
-        </Link>
-        <div className={styles.navLinks}>
-          <Link href="/" className={styles.navLink}>Home</Link>
-          <Link href="/learn" className={styles.navLink}>Learn</Link>
-          <Link href="/evidence" className={styles.navLink}>Evidence</Link>
-          <Link href="/case-selection" className={styles.navLink}>Case Selection</Link>
-          <Link href="/forum" className={styles.navLink}>Forum</Link>
-          {!session ? (
-            <button 
-              onClick={() => signIn("google")}
-              className={styles.loginButton}
-            >
-              Login
-            </button>
-          ) : (
-            <button 
-              onClick={() => signOut()}
-              className={styles.loginButton}
-            >
-              Sign Out
-            </button>
-          )}
-        </div>
-      </nav>
+      <Navigation />
 
       <div className={styles.jumbotron}>
         <div className={styles.jumbotronContent}>
@@ -54,7 +26,10 @@ export default function Home() {
             Unlock the Power of Persuasion with ArguMentor! Learn the essentials of policy debate 
             and boost your confidence, critical thinking, and speaking skills—right from the start.
           </p>
-          <button className={styles.ctaButton}>
+          <button 
+            className={styles.ctaButton}
+            onClick={handleNewsletterSignup}
+          >
             Sign up for our regular updates!
           </button>
         </div>
