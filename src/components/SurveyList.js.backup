@@ -1,0 +1,233 @@
+import { useState, useEffect } from 'react';
+import styles from '../styles/SurveyList.module.css';
+
+export default function SurveyList() {
+  const [surveys, setSurveys] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [filters, setFilters] = useState({
+    status: '',
+    priorityLevel: '',
+    search: ''
+  });
+
+  const fetchSurveys = async () => {
+    setLoading(true);
+    try {
+      const params = new URLSearchParams({
+        page: currentPage,
+        limit: 10,
+        ...filters
+      });
+
+      const response = await fetch(`/api/survey?${params}`);
+      const result = await response.json();
+
+      if (result.success) {
+        setSurveys(result.data);
+        setTotalPages(result.pagination.totalPages);
+      }
+    } catch (error) {
+      console.error('Error fetching surveys:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchSurveys();
+  }, [currentPage, filters]);
+
+  const handleFilterChange = (e) => {
+    const { name, value } = e.target;
+    setFilters(prev => ({
+      ...prev,
+      [name]: value
+    }));
+    setCurrentPage(1);
+  };
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
+
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleDateString('en-IN');
+  };
+
+  const getPriorityColor = (priority) => {
+    switch (priority) {
+      case 'High': return styles.highPriority;
+      case 'Medium': return styles.mediumPriority;
+      case 'Low': return styles.lowPriority;
+      default: return '';
+    }
+  };
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'Surveyed': return styles.statusSurveyed;
+      case 'Under Review': return styles.statusReview;
+      case 'Assistance Provided': return styles.statusProvided;
+      case 'Follow-up Required': return styles.statusFollowup;
+      default: return '';
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className={styles.loadingContainer}>
+        <div className={styles.loadingSpinner}></div>
+        <p>Loading survey data...</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className={styles.surveyList}>
+      <div className={styles.listHeader}>
+        <h2>Survey Responses</h2>
+        <div className={styles.stats}>
+          <span>Total: {surveys.length}</span>
+          <span>Page {currentPage} of {totalPages}</span>
+        </div>
+      </div>
+
+      {/* Filters */}
+      <div className={styles.filters}>
+        <div className={styles.filterGroup}>
+          <input
+            type="text"
+            name="search"
+            placeholder="Search by family name, head of family, or BPL number..."
+            value={filters.search}
+            onChange={handleFilterChange}
+            className={styles.searchInput}
+          />
+        </div>
+        <div className={styles.filterGroup}>
+          <select
+            name="status"
+            value={filters.status}
+            onChange={handleFilterChange}
+            className={styles.filterSelect}
+          >
+            <option value="">All Status</option>
+            <option value="Surveyed">Surveyed</option>
+            <option value="Under Review">Under Review</option>
+            <option value="Assistance Provided">Assistance Provided</option>
+            <option value="Follow-up Required">Follow-up Required</option>
+          </select>
+        </div>
+        <div className={styles.filterGroup}>
+          <select
+            name="priorityLevel"
+            value={filters.priorityLevel}
+            onChange={handleFilterChange}
+            className={styles.filterSelect}
+          >
+            <option value="">All Priorities</option>
+            <option value="High">High Priority</option>
+            <option value="Medium">Medium Priority</option>
+            <option value="Low">Low Priority</option>
+          </select>
+        </div>
+      </div>
+
+      {/* Survey Table */}
+      <div className={styles.tableContainer}>
+        <table className={styles.surveyTable}>
+          <thead>
+            <tr>
+              <th>Family Name</th>
+              <th>Head of Family</th>
+              <th>Contact</th>
+              <th>Family Size</th>
+              <th>Income (₹)</th>
+              <th>Priority</th>
+              <th>Status</th>
+              <th>Survey Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            {surveys.map((survey) => (
+              <tr key={survey._id} className={styles.surveyRow}>
+                <td>
+                  <div className={styles.familyInfo}>
+                    <strong>{survey.familyName}</strong>
+                    {survey.bplCardNumber && (
+                      <small>BPL: {survey.bplCardNumber}</small>
+                    )}
+                  </div>
+                </td>
+                <td>{survey.headOfFamily}</td>
+                <td>{survey.contactNumber}</td>
+                <td>
+                  <div className={styles.familyStats}>
+                    <span>{survey.totalFamilyMembers}</span>
+                    {survey.childrenUnder18 > 0 && (
+                      <small>👶 {survey.childrenUnder18}</small>
+                    )}
+                    {survey.elderlyAbove60 > 0 && (
+                      <small>👴 {survey.elderlyAbove60}</small>
+                    )}
+                  </div>
+                </td>
+                <td>{survey.monthlyIncome.toLocaleString('en-IN')}</td>
+                <td>
+                  <span className={`${styles.priorityBadge} ${getPriorityColor(survey.priorityLevel)}`}>
+                    {survey.priorityLevel}
+                  </span>
+                </td>
+                <td>
+                  <span className={`${styles.statusBadge} ${getStatusColor(survey.status)}`}>
+                    {survey.status}
+                  </span>
+                </td>
+                <td>{formatDate(survey.surveyDate)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+
+        {surveys.length === 0 && (
+          <div className={styles.emptyState}>
+            <p>No survey data found. Start by adding a new survey.</p>
+          </div>
+        )}
+      </div>
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className={styles.pagination}>
+          <button
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+            className={styles.pageButton}
+          >
+            Previous
+          </button>
+          
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+            <button
+              key={page}
+              onClick={() => handlePageChange(page)}
+              className={`${styles.pageButton} ${currentPage === page ? styles.activePage : ''}`}
+            >
+              {page}
+            </button>
+          ))}
+          
+          <button
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            className={styles.pageButton}
+          >
+            Next
+          </button>
+        </div>
+      )}
+    </div>
+  );
+} 
