@@ -41,7 +41,7 @@ const KaramCheduSchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
-  elderlyAbove60: {
+  elderlyAbove85: {
     type: Number,
     default: 0
   },
@@ -50,7 +50,7 @@ const KaramCheduSchema = new mongoose.Schema({
     default: 0
   },
   
-  // Education Details
+  // Education Information
   childrenInSchool: {
     type: Number,
     default: 0
@@ -59,104 +59,83 @@ const KaramCheduSchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
-  educationSchemesAware: {
-    type: Boolean,
-    default: false
-  },
-  educationSchemesApplied: {
-    type: Boolean,
-    default: false
-  },
-  educationSchemesReceived: {
-    type: Boolean,
-    default: false
-  },
-  educationNeeds: [{
+  educationHelpNeeded: {
     type: String,
-    enum: ['School Fees', 'Books & Stationery', 'Uniform', 'Transportation', 'Mid-day Meals', 'Scholarship', 'Other']
-  }],
-  educationBarriers: [{
+    enum: ['Yes', 'No', 'Maybe'],
+    default: 'No'
+  },
+  educationHelpType: {
     type: String,
-    enum: ['Financial Constraints', 'Distance to School', 'Lack of Awareness', 'Family Pressure', 'Health Issues', 'Other']
-  }],
+    enum: ['School Fees', 'Books & Stationery', 'Uniform', 'Transportation', 'Mid-day Meals', 'Scholarship', 'Other', 'None'],
+    default: 'None'
+  },
   
-  // Health Details
+  // Health Information
   healthInsurance: {
-    type: Boolean,
-    default: false
+    type: String,
+    enum: ['Yes', 'No'],
+    default: 'No'
   },
   healthInsuranceType: {
     type: String,
-    enum: ['Ayushman Bharat', 'PM-JAY', 'State Health Insurance', 'Private Insurance', 'None']
+    enum: ['Ayushman Bharat', 'PM-JAY', 'State Health Insurance', 'Private Insurance', 'None'],
+    default: 'None'
   },
   chronicDiseases: {
-    type: Boolean,
-    default: false
+    type: String,
+    enum: ['Yes', 'No'],
+    default: 'No'
   },
   chronicDiseaseDetails: {
     type: String,
     trim: true
   },
   regularMedication: {
-    type: Boolean,
-    default: false
+    type: String,
+    enum: ['Yes', 'No'],
+    default: 'No'
   },
   nearestHospital: {
     type: String,
     trim: true
   },
   hospitalDistance: {
-    type: Number, // in kilometers
+    type: Number,
     default: 0
   },
-  healthSchemesAware: {
-    type: Boolean,
-    default: false
-  },
-  healthSchemesApplied: {
-    type: Boolean,
-    default: false
-  },
-  healthSchemesReceived: {
-    type: Boolean,
-    default: false
-  },
-  healthNeeds: [{
+  healthHelpNeeded: {
     type: String,
-    enum: ['Medical Checkup', 'Medicines', 'Surgery', 'Dental Care', 'Eye Care', 'Maternal Care', 'Child Vaccination', 'Other']
-  }],
+    enum: ['Yes', 'No', 'Maybe'],
+    default: 'No'
+  },
+  healthHelpType: {
+    type: String,
+    enum: ['Medical Checkup', 'Medicines', 'Surgery', 'Dental Care', 'Eye Care', 'Maternal Care', 'Child Vaccination', 'Other', 'None'],
+    default: 'None'
+  },
   
-  // Elder Care Details
+  // Elder Care Information
   elderlyCareNeeded: {
-    type: Boolean,
-    default: false
-  },
-  elderlyCareType: [{
     type: String,
-    enum: ['Medical Care', 'Financial Support', 'Home Care', 'Day Care', 'Pension', 'Other']
-  }],
+    enum: ['Yes', 'No', 'Maybe'],
+    default: 'No'
+  },
+  elderlyCareType: {
+    type: String,
+    enum: ['Medical Care', 'Financial Support', 'Home Care', 'Day Care', 'Pension', 'Other', 'None'],
+    default: 'None'
+  },
   elderlyPension: {
-    type: Boolean,
-    default: false
+    type: String,
+    enum: ['Yes', 'No'],
+    default: 'No'
   },
   elderlyPensionAmount: {
     type: Number,
     default: 0
   },
-  elderlySchemesAware: {
-    type: Boolean,
-    default: false
-  },
-  elderlySchemesApplied: {
-    type: Boolean,
-    default: false
-  },
-  elderlySchemesReceived: {
-    type: Boolean,
-    default: false
-  },
   
-  // Employment & Income
+  // Employment & Income Information
   primaryOccupation: {
     type: String,
     trim: true
@@ -165,19 +144,22 @@ const KaramCheduSchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
-  employmentSchemesAware: {
-    type: Boolean,
-    default: false
+  employmentHelpNeeded: {
+    type: String,
+    enum: ['Yes', 'No', 'Maybe'],
+    default: 'No'
   },
-  employmentSchemesApplied: {
-    type: Boolean,
-    default: false
+  employmentHelpType: {
+    type: String,
+    enum: ['Job Training', 'Financial Assistance', 'Equipment', 'Other', 'None'],
+    default: 'None'
   },
   
-  // Additional Information
+  // Bank Information
   bankAccount: {
-    type: Boolean,
-    default: false
+    type: String,
+    enum: ['Yes', 'No'],
+    default: 'No'
   },
   bankName: {
     type: String,
@@ -218,6 +200,18 @@ const KaramCheduSchema = new mongoose.Schema({
     type: String,
     enum: ['Surveyed', 'Under Review', 'Assistance Provided', 'Follow-up Required'],
     default: 'Surveyed'
+  },
+  
+  // Overall Help Assessment
+  needsImmediateHelp: {
+    type: String,
+    enum: ['Yes', 'No', 'Maybe'],
+    default: 'No'
+  },
+  helpPriority: {
+    type: String,
+    enum: ['Very High', 'High', 'Medium', 'Low', 'None'],
+    default: 'None'
   }
 }, {
   timestamps: true
@@ -229,6 +223,8 @@ KaramCheduSchema.index({ bplCardNumber: 1 });
 KaramCheduSchema.index({ priorityLevel: 1 });
 KaramCheduSchema.index({ status: 1 });
 KaramCheduSchema.index({ surveyDate: -1 });
+KaramCheduSchema.index({ needsImmediateHelp: 1 });
+KaramCheduSchema.index({ helpPriority: 1 });
 
 // Change the collection name to 'SurveyInfo' while keeping the database as 'KaramChedu'
 export default mongoose.models.SurveyInfo || mongoose.model('SurveyInfo', KaramCheduSchema, 'SurveyInfo'); 

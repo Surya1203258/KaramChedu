@@ -1,9 +1,7 @@
 import { useState } from 'react';
-import { useSession } from 'next-auth/react';
 import styles from '../styles/SurveyForm.module.css';
 
 export default function SurveyForm({ setIsLoading }) {
-  const { data: session } = useSession();
   const [formData, setFormData] = useState({
     // Basic Information
     familyName: '',
@@ -16,76 +14,63 @@ export default function SurveyForm({ setIsLoading }) {
     // Family Composition
     totalFamilyMembers: 1,
     childrenUnder18: 0,
-    elderlyAbove60: 0,
+    elderlyAbove85: 0,
     disabledMembers: 0,
     
-    // Education Details
+    // Education Information
     childrenInSchool: 0,
     childrenDroppedOut: 0,
-    educationSchemesAware: false,
-    educationSchemesApplied: false,
-    educationSchemesReceived: false,
-    educationNeeds: [],
-    educationBarriers: [],
+    educationHelpNeeded: 'No',
+    educationHelpType: 'None',
     
-    // Health Details
-    healthInsurance: false,
+    // Health Information
+    healthInsurance: 'No',
     healthInsuranceType: 'None',
-    chronicDiseases: false,
+    chronicDiseases: 'No',
     chronicDiseaseDetails: '',
-    regularMedication: false,
+    regularMedication: 'No',
     nearestHospital: '',
     hospitalDistance: 0,
-    healthSchemesAware: false,
-    healthSchemesApplied: false,
-    healthSchemesReceived: false,
-    healthNeeds: [],
+    healthHelpNeeded: 'No',
+    healthHelpType: 'None',
     
-    // Elder Care Details
-    elderlyCareNeeded: false,
-    elderlyCareType: [],
-    elderlyPension: false,
+    // Elder Care Information
+    elderlyCareNeeded: 'No',
+    elderlyCareType: 'None',
+    elderlyPension: 'No',
     elderlyPensionAmount: 0,
-    elderlySchemesAware: false,
-    elderlySchemesApplied: false,
-    elderlySchemesReceived: false,
     
-    // Employment & Income
+    // Employment & Income Information
     primaryOccupation: '',
     monthlyIncome: 0,
-    employmentSchemesAware: false,
-    employmentSchemesApplied: false,
+    employmentHelpNeeded: 'No',
+    employmentHelpType: 'None',
     
-    // Additional Information
-    bankAccount: false,
+    // Bank Information
+    bankAccount: 'No',
     bankName: '',
     accountNumber: '',
     ifscCode: '',
     
     // Survey Metadata
-    surveyorName: session?.user?.name || '',
+    surveyorName: '',
     notes: '',
     priorityLevel: 'Medium',
-    status: 'Surveyed'
+    status: 'Surveyed',
+    
+    // Overall Help Assessment
+    needsImmediateHelp: 'No',
+    helpPriority: 'None'
   });
 
   const [currentStep, setCurrentStep] = useState(1);
   const [message, setMessage] = useState('');
 
   const handleInputChange = (e) => {
-    const { name, value, type, checked } = e.target;
+    const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value
-    }));
-  };
-
-  const handleArrayChange = (field, value, checked) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: checked 
-        ? [...prev[field], value]
-        : prev[field].filter(item => item !== value)
+      [name]: value
     }));
   };
 
@@ -117,45 +102,39 @@ export default function SurveyForm({ setIsLoading }) {
           aadharNumber: '',
           totalFamilyMembers: 1,
           childrenUnder18: 0,
-          elderlyAbove60: 0,
+          elderlyAbove85: 0,
           disabledMembers: 0,
           childrenInSchool: 0,
           childrenDroppedOut: 0,
-          educationSchemesAware: false,
-          educationSchemesApplied: false,
-          educationSchemesReceived: false,
-          educationNeeds: [],
-          educationBarriers: [],
-          healthInsurance: false,
+          educationHelpNeeded: 'No',
+          educationHelpType: 'None',
+          healthInsurance: 'No',
           healthInsuranceType: 'None',
-          chronicDiseases: false,
+          chronicDiseases: 'No',
           chronicDiseaseDetails: '',
-          regularMedication: false,
+          regularMedication: 'No',
           nearestHospital: '',
           hospitalDistance: 0,
-          healthSchemesAware: false,
-          healthSchemesApplied: false,
-          healthSchemesReceived: false,
-          healthNeeds: [],
-          elderlyCareNeeded: false,
-          elderlyCareType: [],
-          elderlyPension: false,
+          healthHelpNeeded: 'No',
+          healthHelpType: 'None',
+          elderlyCareNeeded: 'No',
+          elderlyCareType: 'None',
+          elderlyPension: 'No',
           elderlyPensionAmount: 0,
-          elderlySchemesAware: false,
-          elderlySchemesApplied: false,
-          elderlySchemesReceived: false,
           primaryOccupation: '',
           monthlyIncome: 0,
-          employmentSchemesAware: false,
-          employmentSchemesApplied: false,
-          bankAccount: false,
+          employmentHelpNeeded: 'No',
+          employmentHelpType: 'None',
+          bankAccount: 'No',
           bankName: '',
           accountNumber: '',
           ifscCode: '',
-          surveyorName: session?.user?.name || '',
+          surveyorName: '',
           notes: '',
           priorityLevel: 'Medium',
-          status: 'Surveyed'
+          status: 'Surveyed',
+          needsImmediateHelp: 'No',
+          helpPriority: 'None'
         });
         setCurrentStep(1);
       } else {
@@ -168,7 +147,7 @@ export default function SurveyForm({ setIsLoading }) {
     }
   };
 
-  const nextStep = () => setCurrentStep(prev => Math.min(prev + 1, 5));
+  const nextStep = () => setCurrentStep(prev => Math.min(prev + 1, 4));
   const prevStep = () => setCurrentStep(prev => Math.max(prev - 1, 1));
 
   const renderStep1 = () => (
@@ -233,11 +212,7 @@ export default function SurveyForm({ setIsLoading }) {
           />
         </div>
       </div>
-    </div>
-  );
 
-  const renderStep2 = () => (
-    <div className={styles.formSection}>
       <h3>Family Composition</h3>
       <div className={styles.formGrid}>
         <div className={styles.formGroup}>
@@ -262,11 +237,11 @@ export default function SurveyForm({ setIsLoading }) {
           />
         </div>
         <div className={styles.formGroup}>
-          <label>Elderly Above 60</label>
+          <label>Elderly Above 85</label>
           <input
             type="number"
-            name="elderlyAbove60"
-            value={formData.elderlyAbove60}
+            name="elderlyAbove85"
+            value={formData.elderlyAbove85}
             onChange={handleInputChange}
             min="0"
           />
@@ -282,8 +257,12 @@ export default function SurveyForm({ setIsLoading }) {
           />
         </div>
       </div>
+    </div>
+  );
 
-      <h3>Education Details</h3>
+  const renderStep2 = () => (
+    <div className={styles.formSection}>
+      <h3>Education Information</h3>
       <div className={styles.formGrid}>
         <div className={styles.formGroup}>
           <label>Children in School</label>
@@ -305,60 +284,86 @@ export default function SurveyForm({ setIsLoading }) {
             min="0"
           />
         </div>
-      </div>
-
-      <div className={styles.checkboxGroup}>
-        <label>
-          <input
-            type="checkbox"
-            name="educationSchemesAware"
-            checked={formData.educationSchemesAware}
+        <div className={styles.formGroup}>
+          <label>Do they need education help?</label>
+          <select
+            name="educationHelpNeeded"
+            value={formData.educationHelpNeeded}
             onChange={handleInputChange}
-          />
-          Aware of Education Schemes
-        </label>
-        <label>
-          <input
-            type="checkbox"
-            name="educationSchemesApplied"
-            checked={formData.educationSchemesApplied}
+          >
+            <option value="No">No</option>
+            <option value="Yes">Yes</option>
+            <option value="Maybe">Maybe</option>
+          </select>
+        </div>
+        <div className={styles.formGroup}>
+          <label>Type of Education Help Needed</label>
+          <select
+            name="educationHelpType"
+            value={formData.educationHelpType}
             onChange={handleInputChange}
-          />
-          Applied for Education Schemes
-        </label>
-        <label>
-          <input
-            type="checkbox"
-            name="educationSchemesReceived"
-            checked={formData.educationSchemesReceived}
-            onChange={handleInputChange}
-          />
-          Received Education Schemes
-        </label>
-      </div>
-
-      <div className={styles.formGroup}>
-        <label>Education Needs (Select all that apply)</label>
-        <div className={styles.checkboxGrid}>
-          {['School Fees', 'Books & Stationery', 'Uniform', 'Transportation', 'Mid-day Meals', 'Scholarship', 'Other'].map(need => (
-            <label key={need}>
-              <input
-                type="checkbox"
-                checked={formData.educationNeeds.includes(need)}
-                onChange={(e) => handleArrayChange('educationNeeds', need, e.target.checked)}
-              />
-              {need}
-            </label>
-          ))}
+          >
+            <option value="None">None</option>
+            <option value="School Fees">School Fees</option>
+            <option value="Books & Stationery">Books & Stationery</option>
+            <option value="Uniform">Uniform</option>
+            <option value="Transportation">Transportation</option>
+            <option value="Mid-day Meals">Mid-day Meals</option>
+            <option value="Scholarship">Scholarship</option>
+            <option value="Other">Other</option>
+          </select>
         </div>
       </div>
-    </div>
-  );
 
-  const renderStep3 = () => (
-    <div className={styles.formSection}>
-      <h3>Health Details</h3>
+      <h3>Health Information</h3>
       <div className={styles.formGrid}>
+        <div className={styles.formGroup}>
+          <label>Do they have health insurance?</label>
+          <select
+            name="healthInsurance"
+            value={formData.healthInsurance}
+            onChange={handleInputChange}
+          >
+            <option value="No">No</option>
+            <option value="Yes">Yes</option>
+          </select>
+        </div>
+        <div className={styles.formGroup}>
+          <label>Type of Health Insurance</label>
+          <select
+            name="healthInsuranceType"
+            value={formData.healthInsuranceType}
+            onChange={handleInputChange}
+          >
+            <option value="None">None</option>
+            <option value="Ayushman Bharat">Ayushman Bharat</option>
+            <option value="PM-JAY">PM-JAY</option>
+            <option value="State Health Insurance">State Health Insurance</option>
+            <option value="Private Insurance">Private Insurance</option>
+          </select>
+        </div>
+        <div className={styles.formGroup}>
+          <label>Do they have chronic diseases?</label>
+          <select
+            name="chronicDiseases"
+            value={formData.chronicDiseases}
+            onChange={handleInputChange}
+          >
+            <option value="No">No</option>
+            <option value="Yes">Yes</option>
+          </select>
+        </div>
+        <div className={styles.formGroup}>
+          <label>Do they take regular medication?</label>
+          <select
+            name="regularMedication"
+            value={formData.regularMedication}
+            onChange={handleInputChange}
+          >
+            <option value="No">No</option>
+            <option value="Yes">Yes</option>
+          </select>
+        </div>
         <div className={styles.formGroup}>
           <label>Nearest Hospital</label>
           <input
@@ -379,81 +384,39 @@ export default function SurveyForm({ setIsLoading }) {
             step="0.1"
           />
         </div>
+        <div className={styles.formGroup}>
+          <label>Do they need health help?</label>
+          <select
+            name="healthHelpNeeded"
+            value={formData.healthHelpNeeded}
+            onChange={handleInputChange}
+          >
+            <option value="No">No</option>
+            <option value="Yes">Yes</option>
+            <option value="Maybe">Maybe</option>
+          </select>
+        </div>
+        <div className={styles.formGroup}>
+          <label>Type of Health Help Needed</label>
+          <select
+            name="healthHelpType"
+            value={formData.healthHelpType}
+            onChange={handleInputChange}
+          >
+            <option value="None">None</option>
+            <option value="Medical Checkup">Medical Checkup</option>
+            <option value="Medicines">Medicines</option>
+            <option value="Surgery">Surgery</option>
+            <option value="Dental Care">Dental Care</option>
+            <option value="Eye Care">Eye Care</option>
+            <option value="Maternal Care">Maternal Care</option>
+            <option value="Child Vaccination">Child Vaccination</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
       </div>
 
-      <div className={styles.formGroup}>
-        <label>Health Insurance Type</label>
-        <select
-          name="healthInsuranceType"
-          value={formData.healthInsuranceType}
-          onChange={handleInputChange}
-        >
-          <option value="None">None</option>
-          <option value="Ayushman Bharat">Ayushman Bharat</option>
-          <option value="PM-JAY">PM-JAY</option>
-          <option value="State Health Insurance">State Health Insurance</option>
-          <option value="Private Insurance">Private Insurance</option>
-        </select>
-      </div>
-
-      <div className={styles.checkboxGroup}>
-        <label>
-          <input
-            type="checkbox"
-            name="healthInsurance"
-            checked={formData.healthInsurance}
-            onChange={handleInputChange}
-          />
-          Has Health Insurance
-        </label>
-        <label>
-          <input
-            type="checkbox"
-            name="chronicDiseases"
-            checked={formData.chronicDiseases}
-            onChange={handleInputChange}
-          />
-          Has Chronic Diseases
-        </label>
-        <label>
-          <input
-            type="checkbox"
-            name="regularMedication"
-            checked={formData.regularMedication}
-            onChange={handleInputChange}
-          />
-          Takes Regular Medication
-        </label>
-        <label>
-          <input
-            type="checkbox"
-            name="healthSchemesAware"
-            checked={formData.healthSchemesAware}
-            onChange={handleInputChange}
-          />
-          Aware of Health Schemes
-        </label>
-        <label>
-          <input
-            type="checkbox"
-            name="healthSchemesApplied"
-            checked={formData.healthSchemesApplied}
-            onChange={handleInputChange}
-          />
-          Applied for Health Schemes
-        </label>
-        <label>
-          <input
-            type="checkbox"
-            name="healthSchemesReceived"
-            checked={formData.healthSchemesReceived}
-            onChange={handleInputChange}
-          />
-          Received Health Schemes
-        </label>
-      </div>
-
-      {formData.chronicDiseases && (
+      {formData.chronicDiseases === 'Yes' && (
         <div className={styles.formGroup}>
           <label>Chronic Disease Details</label>
           <textarea
@@ -463,106 +426,67 @@ export default function SurveyForm({ setIsLoading }) {
           />
         </div>
       )}
-
-      <div className={styles.formGroup}>
-        <label>Health Needs (Select all that apply)</label>
-        <div className={styles.checkboxGrid}>
-          {['Medical Checkup', 'Medicines', 'Surgery', 'Dental Care', 'Eye Care', 'Maternal Care', 'Child Vaccination', 'Other'].map(need => (
-            <label key={need}>
-              <input
-                type="checkbox"
-                checked={formData.healthNeeds.includes(need)}
-                onChange={(e) => handleArrayChange('healthNeeds', need, e.target.checked)}
-              />
-              {need}
-            </label>
-          ))}
-        </div>
-      </div>
     </div>
   );
 
-  const renderStep4 = () => (
+  const renderStep3 = () => (
     <div className={styles.formSection}>
-      <h3>Elder Care Details</h3>
-      <div className={styles.checkboxGroup}>
-        <label>
-          <input
-            type="checkbox"
-            name="elderlyCareNeeded"
-            checked={formData.elderlyCareNeeded}
-            onChange={handleInputChange}
-          />
-          Elderly Care Needed
-        </label>
-        <label>
-          <input
-            type="checkbox"
-            name="elderlyPension"
-            checked={formData.elderlyPension}
-            onChange={handleInputChange}
-          />
-          Receives Elderly Pension
-        </label>
-        <label>
-          <input
-            type="checkbox"
-            name="elderlySchemesAware"
-            checked={formData.elderlySchemesAware}
-            onChange={handleInputChange}
-          />
-          Aware of Elderly Schemes
-        </label>
-        <label>
-          <input
-            type="checkbox"
-            name="elderlySchemesApplied"
-            checked={formData.elderlySchemesApplied}
-            onChange={handleInputChange}
-          />
-          Applied for Elderly Schemes
-        </label>
-        <label>
-          <input
-            type="checkbox"
-            name="elderlySchemesReceived"
-            checked={formData.elderlySchemesReceived}
-            onChange={handleInputChange}
-          />
-          Received Elderly Schemes
-        </label>
-      </div>
-
-      {formData.elderlyPension && (
+      <h3>Elder Care Information</h3>
+      <div className={styles.formGrid}>
         <div className={styles.formGroup}>
-          <label>Elderly Pension Amount (₹)</label>
-          <input
-            type="number"
-            name="elderlyPensionAmount"
-            value={formData.elderlyPensionAmount}
+          <label>Do they need elderly care?</label>
+          <select
+            name="elderlyCareNeeded"
+            value={formData.elderlyCareNeeded}
             onChange={handleInputChange}
-            min="0"
-          />
+          >
+            <option value="No">No</option>
+            <option value="Yes">Yes</option>
+            <option value="Maybe">Maybe</option>
+          </select>
         </div>
-      )}
-
-      <div className={styles.formGroup}>
-        <label>Elder Care Type (Select all that apply)</label>
-        <div className={styles.checkboxGrid}>
-          {['Medical Care', 'Financial Support', 'Home Care', 'Day Care', 'Pension', 'Other'].map(type => (
-            <label key={type}>
-              <input
-                type="checkbox"
-                checked={formData.elderlyCareType.includes(type)}
-                onChange={(e) => handleArrayChange('elderlyCareType', type, e.target.checked)}
-              />
-              {type}
-            </label>
-          ))}
+        <div className={styles.formGroup}>
+          <label>Type of Elder Care Needed</label>
+          <select
+            name="elderlyCareType"
+            value={formData.elderlyCareType}
+            onChange={handleInputChange}
+          >
+            <option value="None">None</option>
+            <option value="Medical Care">Medical Care</option>
+            <option value="Financial Support">Financial Support</option>
+            <option value="Home Care">Home Care</option>
+            <option value="Day Care">Day Care</option>
+            <option value="Pension">Pension</option>
+            <option value="Other">Other</option>
+          </select>
         </div>
+        <div className={styles.formGroup}>
+          <label>Do they receive elderly pension?</label>
+          <select
+            name="elderlyPension"
+            value={formData.elderlyPension}
+            onChange={handleInputChange}
+          >
+            <option value="No">No</option>
+            <option value="Yes">Yes</option>
+          </select>
+        </div>
+        {formData.elderlyPension === 'Yes' && (
+          <div className={styles.formGroup}>
+            <label>Elderly Pension Amount (₹)</label>
+            <input
+              type="number"
+              name="elderlyPensionAmount"
+              value={formData.elderlyPensionAmount}
+              onChange={handleInputChange}
+              min="0"
+            />
+          </div>
+        )}
       </div>
 
-      <h3>Employment & Income</h3>
+      <h3>Employment & Income Information</h3>
       <div className={styles.formGrid}>
         <div className={styles.formGroup}>
           <label>Primary Occupation</label>
@@ -583,80 +507,95 @@ export default function SurveyForm({ setIsLoading }) {
             min="0"
           />
         </div>
-      </div>
-
-      <div className={styles.checkboxGroup}>
-        <label>
-          <input
-            type="checkbox"
-            name="employmentSchemesAware"
-            checked={formData.employmentSchemesAware}
+        <div className={styles.formGroup}>
+          <label>Do they need employment help?</label>
+          <select
+            name="employmentHelpNeeded"
+            value={formData.employmentHelpNeeded}
             onChange={handleInputChange}
-          />
-          Aware of Employment Schemes
-        </label>
-        <label>
-          <input
-            type="checkbox"
-            name="employmentSchemesApplied"
-            checked={formData.employmentSchemesApplied}
+          >
+            <option value="No">No</option>
+            <option value="Yes">Yes</option>
+            <option value="Maybe">Maybe</option>
+          </select>
+        </div>
+        <div className={styles.formGroup}>
+          <label>Type of Employment Help Needed</label>
+          <select
+            name="employmentHelpType"
+            value={formData.employmentHelpType}
             onChange={handleInputChange}
-          />
-          Applied for Employment Schemes
-        </label>
+          >
+            <option value="None">None</option>
+            <option value="Job Training">Job Training</option>
+            <option value="Financial Assistance">Financial Assistance</option>
+            <option value="Equipment">Equipment</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
       </div>
     </div>
   );
 
-  const renderStep5 = () => (
+  const renderStep4 = () => (
     <div className={styles.formSection}>
-      <h3>Bank Details</h3>
-      <div className={styles.checkboxGroup}>
-        <label>
-          <input
-            type="checkbox"
+      <h3>Bank Information</h3>
+      <div className={styles.formGrid}>
+        <div className={styles.formGroup}>
+          <label>Do they have a bank account?</label>
+          <select
             name="bankAccount"
-            checked={formData.bankAccount}
+            value={formData.bankAccount}
             onChange={handleInputChange}
-          />
-          Has Bank Account
-        </label>
-      </div>
-
-      {formData.bankAccount && (
-        <div className={styles.formGrid}>
-          <div className={styles.formGroup}>
-            <label>Bank Name</label>
-            <input
-              type="text"
-              name="bankName"
-              value={formData.bankName}
-              onChange={handleInputChange}
-            />
-          </div>
-          <div className={styles.formGroup}>
-            <label>Account Number</label>
-            <input
-              type="text"
-              name="accountNumber"
-              value={formData.accountNumber}
-              onChange={handleInputChange}
-            />
-          </div>
-          <div className={styles.formGroup}>
-            <label>IFSC Code</label>
-            <input
-              type="text"
-              name="ifscCode"
-              value={formData.ifscCode}
-              onChange={handleInputChange}
-            />
-          </div>
+          >
+            <option value="No">No</option>
+            <option value="Yes">Yes</option>
+          </select>
         </div>
-      )}
+        {formData.bankAccount === 'Yes' && (
+          <>
+            <div className={styles.formGroup}>
+              <label>Bank Name</label>
+              <input
+                type="text"
+                name="bankName"
+                value={formData.bankName}
+                onChange={handleInputChange}
+              />
+            </div>
+            <div className={styles.formGroup}>
+              <label>Account Number</label>
+              <input
+                type="text"
+                name="accountNumber"
+                value={formData.accountNumber}
+                onChange={handleInputChange}
+              />
+            </div>
+            <div className={styles.formGroup}>
+              <label>IFSC Code</label>
+              <input
+                type="text"
+                name="ifscCode"
+                value={formData.ifscCode}
+                onChange={handleInputChange}
+              />
+            </div>
+          </>
+        )}
+      </div>
 
       <h3>Survey Details</h3>
       <div className={styles.formGrid}>
+        <div className={styles.formGroup}>
+          <label>Surveyor Name</label>
+          <input
+            type="text"
+            name="surveyorName"
+            value={formData.surveyorName}
+            onChange={handleInputChange}
+          />
+        </div>
         <div className={styles.formGroup}>
           <label>Priority Level</label>
           <select
@@ -664,9 +603,9 @@ export default function SurveyForm({ setIsLoading }) {
             value={formData.priorityLevel}
             onChange={handleInputChange}
           >
-            <option value="High">High</option>
-            <option value="Medium">Medium</option>
             <option value="Low">Low</option>
+            <option value="Medium">Medium</option>
+            <option value="High">High</option>
           </select>
         </div>
         <div className={styles.formGroup}>
@@ -680,6 +619,32 @@ export default function SurveyForm({ setIsLoading }) {
             <option value="Under Review">Under Review</option>
             <option value="Assistance Provided">Assistance Provided</option>
             <option value="Follow-up Required">Follow-up Required</option>
+          </select>
+        </div>
+        <div className={styles.formGroup}>
+          <label>Do they need immediate help?</label>
+          <select
+            name="needsImmediateHelp"
+            value={formData.needsImmediateHelp}
+            onChange={handleInputChange}
+          >
+            <option value="No">No</option>
+            <option value="Yes">Yes</option>
+            <option value="Maybe">Maybe</option>
+          </select>
+        </div>
+        <div className={styles.formGroup}>
+          <label>Help Priority</label>
+          <select
+            name="helpPriority"
+            value={formData.helpPriority}
+            onChange={handleInputChange}
+          >
+            <option value="None">None</option>
+            <option value="Low">Low</option>
+            <option value="Medium">Medium</option>
+            <option value="High">High</option>
+            <option value="Very High">Very High</option>
           </select>
         </div>
       </div>
@@ -702,7 +667,6 @@ export default function SurveyForm({ setIsLoading }) {
       case 2: return renderStep2();
       case 3: return renderStep3();
       case 4: return renderStep4();
-      case 5: return renderStep5();
       default: return renderStep1();
     }
   };
@@ -710,11 +674,11 @@ export default function SurveyForm({ setIsLoading }) {
   return (
     <div className={styles.surveyForm}>
       <div className={styles.formHeader}>
-        <h2>Family Survey Form - Step {currentStep} of 5</h2>
+        <h2>Family Survey Form - Step {currentStep} of 4</h2>
         <div className={styles.progressBar}>
           <div 
             className={styles.progressFill} 
-            style={{ width: `${(currentStep / 5) * 100}%` }}
+            style={{ width: `${(currentStep / 4) * 100}%` }}
           ></div>
         </div>
       </div>
@@ -735,7 +699,7 @@ export default function SurveyForm({ setIsLoading }) {
             </button>
           )}
           
-          {currentStep < 5 ? (
+          {currentStep < 4 ? (
             <button type="button" onClick={nextStep} className={styles.primaryButton}>
               Next
             </button>
