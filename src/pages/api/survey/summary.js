@@ -189,6 +189,82 @@ export default async function handler(req, res) {
       assistanceProvided: recentSurveys.filter(s => s.status === 'Assistance Provided').length
     };
 
+    // New field aggregations
+    const casteCounts = {
+      FC: surveys.filter(s => s.caste === 'FC').length,
+      BC: surveys.filter(s => s.caste === 'BC').length,
+      SC: surveys.filter(s => s.caste === 'SC').length
+    };
+    const professionCounts = {
+      Agriculture: surveys.filter(s => s.profession === 'Agriculture').length,
+      Job: surveys.filter(s => s.profession === 'Job').length,
+      'Not working': surveys.filter(s => s.profession === 'Not working').length
+    };
+    const incomeBracketCounts = {
+      '<10,000': surveys.filter(s => s.monthlyIncomeBracket === '<10,000').length,
+      '10,000-20,000': surveys.filter(s => s.monthlyIncomeBracket === '10,000-20,000').length,
+      '20,000-30,000': surveys.filter(s => s.monthlyIncomeBracket === '20,000-30,000').length,
+      '30,000-50,000': surveys.filter(s => s.monthlyIncomeBracket === '30,000-50,000').length,
+      '50,000+': surveys.filter(s => s.monthlyIncomeBracket === '50,000+').length
+    };
+    const attendsPrivateSchoolCounts = {
+      Yes: surveys.filter(s => s.attendsPrivateSchool === 'Yes').length,
+      No: surveys.filter(s => s.attendsPrivateSchool === 'No').length
+    };
+    const attendsTuitionOrOtherClassesCounts = {
+      Yes: surveys.filter(s => s.attendsTuitionOrOtherClasses === 'Yes').length,
+      No: surveys.filter(s => s.attendsTuitionOrOtherClasses === 'No').length
+    };
+    const overallEducationCostBracketCounts = {
+      '<10,000': surveys.filter(s => s.overallEducationCostBracket === '<10,000').length,
+      '10,000-20,000': surveys.filter(s => s.overallEducationCostBracket === '10,000-20,000').length,
+      '20,000-30,000': surveys.filter(s => s.overallEducationCostBracket === '20,000-30,000').length,
+      '30,000-50,000': surveys.filter(s => s.overallEducationCostBracket === '30,000-50,000').length,
+      '50,000+': surveys.filter(s => s.overallEducationCostBracket === '50,000+').length
+    };
+    const hasLifeInsuranceCounts = {
+      Yes: surveys.filter(s => s.hasLifeInsurance === 'Yes').length,
+      No: surveys.filter(s => s.hasLifeInsurance === 'No').length
+    };
+    const totalElderlyAbove85 = surveys.reduce((sum, s) => sum + (s.numberOfElderlyAbove85 || 0), 0);
+    const totalElderlyOrDisabled = surveys.reduce((sum, s) => sum + (s.numberOfElderlyOrDisabled || 0), 0);
+    const willTakeFoodDeliveryCounts = {
+      Yes: surveys.filter(s => s.willTakeFoodDelivery === 'Yes').length,
+      No: surveys.filter(s => s.willTakeFoodDelivery === 'No').length
+    };
+    const willPayForFoodDeliveryCounts = {
+      Yes: surveys.filter(s => s.willPayForFoodDelivery === 'Yes').length,
+      No: surveys.filter(s => s.willPayForFoodDelivery === 'No').length
+    };
+    const willTakeFoodIfFreeCounts = {
+      Yes: surveys.filter(s => s.willTakeFoodIfFree === 'Yes').length,
+      No: surveys.filter(s => s.willTakeFoodIfFree === 'No').length
+    };
+    const needsMedicineDeliveryHelpCounts = {
+      Yes: surveys.filter(s => s.needsMedicineDeliveryHelp === 'Yes').length,
+      No: surveys.filter(s => s.needsMedicineDeliveryHelp === 'No').length
+    };
+    const needsHospitalVisitHelpCounts = {
+      Yes: surveys.filter(s => s.needsHospitalVisitHelp === 'Yes').length,
+      No: surveys.filter(s => s.needsHospitalVisitHelp === 'No').length
+    };
+    const needsHealthCheckupHelpCounts = {
+      Yes: surveys.filter(s => s.needsHealthCheckupHelp === 'Yes').length,
+      No: surveys.filter(s => s.needsHealthCheckupHelp === 'No').length
+    };
+    const helpOpeningFixedDepositCounts = {
+      Yes: surveys.filter(s => s.helpOpeningFixedDeposit === 'Yes').length,
+      No: surveys.filter(s => s.helpOpeningFixedDeposit === 'No').length
+    };
+    const helpTakingLoanCounts = {
+      Yes: surveys.filter(s => s.helpTakingLoan === 'Yes').length,
+      No: surveys.filter(s => s.helpTakingLoan === 'No').length
+    };
+    const helpWithDigitalPaymentsCounts = {
+      Yes: surveys.filter(s => s.helpWithDigitalPayments === 'Yes').length,
+      No: surveys.filter(s => s.helpWithDigitalPayments === 'No').length
+    };
+
     const summary = {
       totalSurveys,
       totalFamilies,
@@ -204,7 +280,26 @@ export default async function handler(req, res) {
       elderCare,
       employment,
       status,
-      recentActivity
+      recentActivity,
+      // New fields for frontend summary
+      casteCounts,
+      professionCounts,
+      incomeBracketCounts,
+      attendsPrivateSchoolCounts,
+      attendsTuitionOrOtherClassesCounts,
+      overallEducationCostBracketCounts,
+      hasLifeInsuranceCounts,
+      totalElderlyAbove85,
+      totalElderlyOrDisabled,
+      willTakeFoodDeliveryCounts,
+      willPayForFoodDeliveryCounts,
+      willTakeFoodIfFreeCounts,
+      needsMedicineDeliveryHelpCounts,
+      needsHospitalVisitHelpCounts,
+      needsHealthCheckupHelpCounts,
+      helpOpeningFixedDepositCounts,
+      helpTakingLoanCounts,
+      helpWithDigitalPaymentsCounts
     };
 
     res.status(200).json({

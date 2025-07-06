@@ -1,5 +1,5 @@
 import dbConnect from '../../../lib/dbConnect';
-import KaramChedu from '../../../models/KaramChedu';
+import KaramCheduSurvey from '../../../models/KaramCheduSurvey';
 
 export default async function handler(req, res) {
   await dbConnect();
@@ -9,18 +9,16 @@ export default async function handler(req, res) {
       const surveyData = req.body;
       
       // Set default values for new fields
-      const survey = new KaramChedu({
+      const survey = new KaramCheduSurvey({
         ...surveyData,
-        surveyDate: new Date(),
-        status: 'Surveyed',
-        priorityLevel: 'Medium'
+        surveyDate: new Date()
       });
 
       const savedSurvey = await survey.save();
       res.status(201).json({ success: true, data: savedSurvey });
     } catch (error) {
       console.error('Error creating survey:', error);
-      res.status(500).json({ success: false, error: 'Failed to create survey' });
+      res.status(500).json({ success: false, error: error?.message || JSON.stringify(error) || 'Failed to create survey' });
     }
   } else if (req.method === 'GET') {
     try {
@@ -33,9 +31,8 @@ export default async function handler(req, res) {
       
       if (search) {
         filter.$or = [
-          { familyName: { $regex: search, $options: 'i' } },
-          { headOfFamily: { $regex: search, $options: 'i' } },
-          { bplCardNumber: { $regex: search, $options: 'i' } }
+          { fullName: { $regex: search, $options: 'i' } },
+          { contactNumber: { $regex: search, $options: 'i' } }
         ];
       }
       
@@ -55,12 +52,12 @@ export default async function handler(req, res) {
         filter.helpPriority = helpPriority;
       }
 
-      const surveys = await KaramChedu.find(filter)
+      const surveys = await KaramCheduSurvey.find(filter)
         .sort({ surveyDate: -1 })
         .skip(skip)
         .limit(parseInt(limit));
 
-      const total = await KaramChedu.countDocuments(filter);
+      const total = await KaramCheduSurvey.countDocuments(filter);
       const totalPages = Math.ceil(total / parseInt(limit));
 
       res.status(200).json({

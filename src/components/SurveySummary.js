@@ -44,6 +44,7 @@ export default function SurveySummary() {
   }
 
   const formatNumber = (num) => {
+    if (typeof num !== 'number' || isNaN(num)) return '0';
     return num.toLocaleString('en-IN');
   };
 
@@ -202,15 +203,13 @@ export default function SurveySummary() {
               {formatPercentage(summary.demographics.childrenUnder18, summary.totalPopulation)} of total population
             </div>
           </div>
-
           <div className={styles.demographicCard}>
-            <h4>Elderly (Above 85)</h4>
-            <div className={styles.demographicValue}>{formatNumber(summary.demographics.elderlyAbove85)}</div>
+            <h4>Elderly (65+)</h4>
+            <div className={styles.demographicValue}>{formatNumber(summary.demographics.elderlyAbove65)}</div>
             <div className={styles.demographicSubtext}>
-              {formatPercentage(summary.demographics.elderlyAbove85, summary.totalPopulation)} of total population
+              {formatPercentage(summary.demographics.elderlyAbove65, summary.totalPopulation)} of total population
             </div>
           </div>
-
           <div className={styles.demographicCard}>
             <h4>Disabled Members</h4>
             <div className={styles.demographicValue}>{formatNumber(summary.demographics.disabledMembers)}</div>
@@ -218,7 +217,6 @@ export default function SurveySummary() {
               {formatPercentage(summary.demographics.disabledMembers, summary.totalPopulation)} of total population
             </div>
           </div>
-
           <div className={styles.demographicCard}>
             <h4>Average Family Size</h4>
             <div className={styles.demographicValue}>{summary.demographics.averageFamilySize.toFixed(1)}</div>
@@ -240,7 +238,6 @@ export default function SurveySummary() {
               {formatPercentage(summary.education.childrenInSchool, summary.demographics.childrenUnder18)} of children
             </div>
           </div>
-
           <div className={styles.educationCard}>
             <h4>Children Dropped Out</h4>
             <div className={styles.educationValue}>{formatNumber(summary.education.childrenDroppedOut)}</div>
@@ -248,13 +245,24 @@ export default function SurveySummary() {
               {formatPercentage(summary.education.childrenDroppedOut, summary.demographics.childrenUnder18)} of children
             </div>
           </div>
-
           <div className={styles.educationCard}>
             <h4>Education Help Needed</h4>
             <div className={styles.educationValue}>{formatNumber(summary.education.helpNeeded)}</div>
             <div className={styles.educationSubtext}>
               {formatPercentage(summary.education.helpNeeded, summary.totalSurveys)} of families
             </div>
+          </div>
+          <div className={styles.educationCard}>
+            <h4>Private School (Yes)</h4>
+            <div className={styles.educationValue}>{formatNumber(summary.attendsPrivateSchoolCounts?.Yes || 0)}</div>
+          </div>
+          <div className={styles.educationCard}>
+            <h4>Tuition (Yes)</h4>
+            <div className={styles.educationValue}>{formatNumber(summary.attendsTuitionOrOtherClassesCounts?.Yes || 0)}</div>
+          </div>
+          <div className={styles.educationCard}>
+            <h4>Overall Education Cost</h4>
+            <div className={styles.educationValue}> <span>&lt;10k: {formatNumber(summary.overallEducationCostBracketCounts?.['<10,000'] || 0)}</span> <span>10-20k: {formatNumber(summary.overallEducationCostBracketCounts?.['10,000-20,000'] || 0)}</span> <span>20-30k: {formatNumber(summary.overallEducationCostBracketCounts?.['20,000-30,000'] || 0)}</span> <span>30-50k: {formatNumber(summary.overallEducationCostBracketCounts?.['30,000-50,000'] || 0)}</span> <span>50k+: {formatNumber(summary.overallEducationCostBracketCounts?.['50,000+'] || 0)}</span></div>
           </div>
         </div>
       </div>
@@ -264,35 +272,24 @@ export default function SurveySummary() {
         <h3>🏥 Health Overview</h3>
         <div className={styles.healthGrid}>
           <div className={styles.healthCard}>
-            <h4>Health Insurance</h4>
+            <h4>Health Insurance (Yes)</h4>
             <div className={styles.healthValue}>{formatNumber(summary.health.healthInsurance)}</div>
-            <div className={styles.healthSubtext}>
-              {formatPercentage(summary.health.healthInsurance, summary.totalSurveys)} of families
-            </div>
           </div>
-
           <div className={styles.healthCard}>
-            <h4>Chronic Diseases</h4>
+            <h4>Chronic Diseases (Yes)</h4>
             <div className={styles.healthValue}>{formatNumber(summary.health.chronicDiseases)}</div>
-            <div className={styles.healthSubtext}>
-              {formatPercentage(summary.health.chronicDiseases, summary.totalSurveys)} of families
-            </div>
           </div>
-
           <div className={styles.healthCard}>
-            <h4>Regular Medication</h4>
+            <h4>Regular Medication (Yes)</h4>
             <div className={styles.healthValue}>{formatNumber(summary.health.regularMedication)}</div>
-            <div className={styles.healthSubtext}>
-              {formatPercentage(summary.health.regularMedication, summary.totalSurveys)} of families
-            </div>
           </div>
-
           <div className={styles.healthCard}>
-            <h4>Health Help Needed</h4>
+            <h4>Health Help Needed (Yes)</h4>
             <div className={styles.healthValue}>{formatNumber(summary.health.helpNeeded)}</div>
-            <div className={styles.healthSubtext}>
-              {formatPercentage(summary.health.helpNeeded, summary.totalSurveys)} of families
-            </div>
+          </div>
+          <div className={styles.healthCard}>
+            <h4>Life Insurance (Yes)</h4>
+            <div className={styles.healthValue}>{formatNumber(summary.hasLifeInsuranceCounts?.Yes || 0)}</div>
           </div>
         </div>
       </div>
@@ -302,49 +299,101 @@ export default function SurveySummary() {
         <h3>👴 Elder Care Overview</h3>
         <div className={styles.elderCareGrid}>
           <div className={styles.elderCareCard}>
-            <h4>Elderly Care Needed</h4>
+            <h4>Elderly Care Needed (Yes)</h4>
             <div className={styles.elderCareValue}>{formatNumber(summary.elderCare.careNeeded)}</div>
-            <div className={styles.elderCareSubtext}>
-              {formatPercentage(summary.elderCare.careNeeded, summary.totalSurveys)} of families
-            </div>
           </div>
-
           <div className={styles.elderCareCard}>
-            <h4>Elderly Pension</h4>
+            <h4>Elderly Pension (Yes)</h4>
             <div className={styles.elderCareValue}>{formatNumber(summary.elderCare.pension)}</div>
-            <div className={styles.elderCareSubtext}>
-              {formatPercentage(summary.elderCare.pension, summary.totalSurveys)} of families
-            </div>
           </div>
-
           <div className={styles.elderCareCard}>
             <h4>Average Pension Amount</h4>
             <div className={styles.elderCareValue}>₹{formatNumber(summary.elderCare.averagePensionAmount)}</div>
-            <div className={styles.elderCareSubtext}>
-              per month
-            </div>
+          </div>
+          <div className={styles.elderCareCard}>
+            <h4>Number of Elderly (65+)</h4>
+            <div className={styles.elderCareValue}>{formatNumber(summary.totalElderlyAbove65 || 0)}</div>
+          </div>
+          <div className={styles.elderCareCard}>
+            <h4>Number of Elderly or Disabled</h4>
+            <div className={styles.elderCareValue}>{formatNumber(summary.totalElderlyOrDisabled || 0)}</div>
           </div>
         </div>
       </div>
 
-      {/* Employment Overview */}
+      {/* Food/Elderly Help */}
       <div className={styles.section}>
-        <h3>💼 Employment Overview</h3>
-        <div className={styles.employmentGrid}>
-          <div className={styles.employmentCard}>
-            <h4>Employment Help Needed</h4>
-            <div className={styles.employmentValue}>{formatNumber(summary.employment.helpNeeded)}</div>
-            <div className={styles.employmentSubtext}>
-              {formatPercentage(summary.employment.helpNeeded, summary.totalSurveys)} of families
-            </div>
+        <h3>🍱 Food & Elderly Help</h3>
+        <div className={styles.demographicsGrid}>
+          <div className={styles.demographicCard}>
+            <h4>Will Take Food Delivered (Yes)</h4>
+            <div>{formatNumber(summary.willTakeFoodDeliveryCounts?.Yes || 0)}</div>
           </div>
+          <div className={styles.demographicCard}>
+            <h4>Will Pay for Food Delivery (Yes)</h4>
+            <div>{formatNumber(summary.willPayForFoodDeliveryCounts?.Yes || 0)}</div>
+          </div>
+          <div className={styles.demographicCard}>
+            <h4>Will Take if Free (Yes)</h4>
+            <div>{formatNumber(summary.willTakeFoodIfFreeCounts?.Yes || 0)}</div>
+          </div>
+          <div className={styles.demographicCard}>
+            <h4>Needs Medicine Delivery Help (Yes)</h4>
+            <div>{formatNumber(summary.needsMedicineDeliveryHelpCounts?.Yes || 0)}</div>
+          </div>
+          <div className={styles.demographicCard}>
+            <h4>Needs Hospital Visit Help (Yes)</h4>
+            <div>{formatNumber(summary.needsHospitalVisitHelpCounts?.Yes || 0)}</div>
+          </div>
+          <div className={styles.demographicCard}>
+            <h4>Needs Health Checkup Help (Yes)</h4>
+            <div>{formatNumber(summary.needsHealthCheckupHelpCounts?.Yes || 0)}</div>
+          </div>
+        </div>
+      </div>
 
-          <div className={styles.employmentCard}>
-            <h4>Bank Account</h4>
-            <div className={styles.employmentValue}>{formatNumber(summary.employment.bankAccount)}</div>
-            <div className={styles.employmentSubtext}>
-              {formatPercentage(summary.employment.bankAccount, summary.totalSurveys)} of families
-            </div>
+      {/* Financial Services */}
+      <div className={styles.section}>
+        <h3>💳 Financial Services</h3>
+        <div className={styles.demographicsGrid}>
+          <div className={styles.demographicCard}>
+            <h4>Help Opening Fixed Deposit (Yes)</h4>
+            <div>{formatNumber(summary.helpOpeningFixedDepositCounts?.Yes || 0)}</div>
+          </div>
+          <div className={styles.demographicCard}>
+            <h4>Help Taking Loan (Yes)</h4>
+            <div>{formatNumber(summary.helpTakingLoanCounts?.Yes || 0)}</div>
+          </div>
+          <div className={styles.demographicCard}>
+            <h4>Help With Digital Payments (Yes)</h4>
+            <div>{formatNumber(summary.helpWithDigitalPaymentsCounts?.Yes || 0)}</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Caste, Profession, Income Bracket */}
+      <div className={styles.section}>
+        <h3>🗂️ Caste, Profession, Income Bracket</h3>
+        <div className={styles.demographicsGrid}>
+          <div className={styles.demographicCard}>
+            <h4>Caste Distribution</h4>
+            <div>FC: {summary.casteCounts?.FC || 0}</div>
+            <div>BC: {summary.casteCounts?.BC || 0}</div>
+            <div>SC: {summary.casteCounts?.SC || 0}</div>
+          </div>
+          <div className={styles.demographicCard}>
+            <h4>Profession</h4>
+            <div>Agriculture: {summary.professionCounts?.Agriculture || 0}</div>
+            <div>Job: {summary.professionCounts?.Job || 0}</div>
+            <div>Not working: {summary.professionCounts?.['Not working'] || 0}</div>
+          </div>
+          <div className={styles.demographicCard}>
+            <h4>Monthly Income Bracket</h4>
+            <div>&lt;10,000: {summary.incomeBracketCounts?.['<10,000'] || 0}</div>
+            <div>10,000-20,000: {summary.incomeBracketCounts?.['10,000-20,000'] || 0}</div>
+            <div>20,000-30,000: {summary.incomeBracketCounts?.['20,000-30,000'] || 0}</div>
+            <div>30,000-50,000: {summary.incomeBracketCounts?.['30,000-50,000'] || 0}</div>
+            <div>50,000+: {summary.incomeBracketCounts?.['50,000+'] || 0}</div>
           </div>
         </div>
       </div>

@@ -4,17 +4,14 @@ import styles from '../styles/SurveyForm.module.css';
 export default function SurveyForm({ setIsLoading }) {
   const [formData, setFormData] = useState({
     // Basic Information
-    familyName: '',
-    headOfFamily: '',
+    fullName: '',
     contactNumber: '',
     address: '',
-    bplCardNumber: '',
-    aadharNumber: '',
     
     // Family Composition
     totalFamilyMembers: 1,
     childrenUnder18: 0,
-    elderlyAbove85: 0,
+    elderlyAbove65: 0,
     disabledMembers: 0,
     
     // Education Information
@@ -38,7 +35,6 @@ export default function SurveyForm({ setIsLoading }) {
     elderlyCareNeeded: 'No',
     elderlyCareType: 'None',
     elderlyPension: 'No',
-    elderlyPensionAmount: 0,
     
     // Employment & Income Information
     primaryOccupation: '',
@@ -48,9 +44,6 @@ export default function SurveyForm({ setIsLoading }) {
     
     // Bank Information
     bankAccount: 'No',
-    bankName: '',
-    accountNumber: '',
-    ifscCode: '',
     
     // Survey Metadata
     surveyorName: '',
@@ -59,12 +52,32 @@ export default function SurveyForm({ setIsLoading }) {
     status: 'Surveyed',
     
     // Overall Help Assessment
-    needsImmediateHelp: 'No',
-    helpPriority: 'None'
+    helpPriority: 'None',
+    
+    // New fields
+    caste: '',
+    profession: '',
+    monthlyIncomeBracket: '',
+    attendsPrivateSchool: '',
+    attendsTuitionOrOtherClasses: '',
+    overallEducationCostBracket: '',
+    hasLifeInsurance: '',
+    numberOfElderlyAbove65: 0,
+    willTakeFoodDelivery: '',
+    willPayForFoodDelivery: '',
+    willTakeFoodIfFree: '',
+    needsMedicineDeliveryHelp: '',
+    needsHospitalVisitHelp: '',
+    needsHealthCheckupHelp: '',
+    helpOpeningFixedDeposit: '',
+    helpTakingLoan: '',
+    helpWithDigitalPayments: '',
+    familyMemberNames: ['']
   });
 
   const [currentStep, setCurrentStep] = useState(1);
   const [message, setMessage] = useState('');
+  const [step3Error, setStep3Error] = useState('');
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -78,6 +91,14 @@ export default function SurveyForm({ setIsLoading }) {
     e.preventDefault();
     setIsLoading(true);
     setMessage('');
+    setStep3Error('');
+
+    // Require helpOpeningFixedDeposit on submit
+    if (!formData.helpOpeningFixedDeposit) {
+      setStep3Error('Please select whether you need help opening a fixed deposit before submitting.');
+      setIsLoading(false);
+      return;
+    }
 
     try {
       const response = await fetch('/api/survey', {
@@ -94,15 +115,12 @@ export default function SurveyForm({ setIsLoading }) {
         setMessage('Survey data saved successfully!');
         // Reset form
         setFormData({
-          familyName: '',
-          headOfFamily: '',
+          fullName: '',
           contactNumber: '',
           address: '',
-          bplCardNumber: '',
-          aadharNumber: '',
           totalFamilyMembers: 1,
           childrenUnder18: 0,
-          elderlyAbove85: 0,
+          elderlyAbove65: 0,
           disabledMembers: 0,
           childrenInSchool: 0,
           childrenDroppedOut: 0,
@@ -120,34 +138,50 @@ export default function SurveyForm({ setIsLoading }) {
           elderlyCareNeeded: 'No',
           elderlyCareType: 'None',
           elderlyPension: 'No',
-          elderlyPensionAmount: 0,
           primaryOccupation: '',
           monthlyIncome: 0,
           employmentHelpNeeded: 'No',
           employmentHelpType: 'None',
           bankAccount: 'No',
-          bankName: '',
-          accountNumber: '',
-          ifscCode: '',
           surveyorName: '',
           notes: '',
           priorityLevel: 'Medium',
           status: 'Surveyed',
-          needsImmediateHelp: 'No',
-          helpPriority: 'None'
+          helpPriority: 'None',
+          caste: '',
+          profession: '',
+          monthlyIncomeBracket: '',
+          attendsPrivateSchool: '',
+          attendsTuitionOrOtherClasses: '',
+          overallEducationCostBracket: '',
+          hasLifeInsurance: '',
+          numberOfElderlyAbove65: 0,
+          willTakeFoodDelivery: '',
+          willPayForFoodDelivery: '',
+          willTakeFoodIfFree: '',
+          needsMedicineDeliveryHelp: '',
+          needsHospitalVisitHelp: '',
+          needsHealthCheckupHelp: '',
+          helpOpeningFixedDeposit: '',
+          helpTakingLoan: '',
+          helpWithDigitalPayments: '',
+          familyMemberNames: ['']
         });
         setCurrentStep(1);
       } else {
-        setMessage('Error saving survey data: ' + result.message);
+        setMessage('Error saving survey data: ' + (result.error || JSON.stringify(result.details) || 'Unknown error'));
       }
     } catch (error) {
-      setMessage('Error saving survey data: ' + error.message);
+      setMessage('Error saving survey data: ' + (error.message || 'Unknown error'));
     } finally {
       setIsLoading(false);
     }
   };
 
-  const nextStep = () => setCurrentStep(prev => Math.min(prev + 1, 4));
+  const nextStep = () => {
+    setStep3Error('');
+    setCurrentStep(prev => Math.min(prev + 1, 3));
+  };
   const prevStep = () => setCurrentStep(prev => Math.max(prev - 1, 1));
 
   const renderStep1 = () => (
@@ -155,24 +189,37 @@ export default function SurveyForm({ setIsLoading }) {
       <h3>Basic Information</h3>
       <div className={styles.formGrid}>
         <div className={styles.formGroup}>
-          <label>Family Name *</label>
+          <label>Full Name *</label>
           <input
             type="text"
-            name="familyName"
-            value={formData.familyName}
+            name="fullName"
+            value={formData.fullName}
             onChange={handleInputChange}
             required
           />
         </div>
         <div className={styles.formGroup}>
-          <label>Head of Family *</label>
-          <input
-            type="text"
-            name="headOfFamily"
-            value={formData.headOfFamily}
-            onChange={handleInputChange}
-            required
-          />
+          <label>Family Member Names</label>
+          {formData.familyMemberNames.map((name, idx) => (
+            <div key={idx} style={{ display: 'flex', alignItems: 'center', marginBottom: 4 }}>
+              <input
+                type="text"
+                value={name}
+                onChange={e => {
+                  const updated = [...formData.familyMemberNames];
+                  updated[idx] = e.target.value;
+                  setFormData(f => ({ ...f, familyMemberNames: updated }));
+                }}
+                placeholder={`Member ${idx + 1}`}
+                style={{ flex: 1 }}
+              />
+              <button type="button" onClick={() => {
+                const updated = formData.familyMemberNames.filter((_, i) => i !== idx);
+                setFormData(f => ({ ...f, familyMemberNames: updated.length ? updated : [''] }));
+              }} style={{ marginLeft: 8 }} disabled={formData.familyMemberNames.length === 1}>Remove</button>
+            </div>
+          ))}
+          <button type="button" onClick={() => setFormData(f => ({ ...f, familyMemberNames: [...f.familyMemberNames, ''] }))}>Add Member</button>
         </div>
         <div className={styles.formGroup}>
           <label>Contact Number *</label>
@@ -191,24 +238,6 @@ export default function SurveyForm({ setIsLoading }) {
             value={formData.address}
             onChange={handleInputChange}
             required
-          />
-        </div>
-        <div className={styles.formGroup}>
-          <label>BPL Card Number</label>
-          <input
-            type="text"
-            name="bplCardNumber"
-            value={formData.bplCardNumber}
-            onChange={handleInputChange}
-          />
-        </div>
-        <div className={styles.formGroup}>
-          <label>Aadhar Number</label>
-          <input
-            type="text"
-            name="aadharNumber"
-            value={formData.aadharNumber}
-            onChange={handleInputChange}
           />
         </div>
       </div>
@@ -237,11 +266,11 @@ export default function SurveyForm({ setIsLoading }) {
           />
         </div>
         <div className={styles.formGroup}>
-          <label>Elderly Above 85</label>
+          <label>Elderly Above 65</label>
           <input
             type="number"
-            name="elderlyAbove85"
-            value={formData.elderlyAbove85}
+            name="elderlyAbove65"
+            value={formData.elderlyAbove65}
             onChange={handleInputChange}
             min="0"
           />
@@ -308,129 +337,42 @@ export default function SurveyForm({ setIsLoading }) {
             <option value="Books & Stationery">Books & Stationery</option>
             <option value="Uniform">Uniform</option>
             <option value="Transportation">Transportation</option>
-            <option value="Mid-day Meals">Mid-day Meals</option>
+            <option value="Dinner">Dinner</option>
+            <option value="Breakfast">Breakfast</option>
+            <option value="Tuition">Tuition</option>
             <option value="Scholarship">Scholarship</option>
             <option value="Other">Other</option>
           </select>
         </div>
-      </div>
-
-      <h3>Health Information</h3>
-      <div className={styles.formGrid}>
         <div className={styles.formGroup}>
-          <label>Do they have health insurance?</label>
-          <select
-            name="healthInsurance"
-            value={formData.healthInsurance}
-            onChange={handleInputChange}
-          >
-            <option value="No">No</option>
+          <label>Are they going to private school?</label>
+          <select name="attendsPrivateSchool" value={formData.attendsPrivateSchool} onChange={handleInputChange}>
+            <option value="">Select</option>
             <option value="Yes">Yes</option>
-          </select>
-        </div>
-        <div className={styles.formGroup}>
-          <label>Type of Health Insurance</label>
-          <select
-            name="healthInsuranceType"
-            value={formData.healthInsuranceType}
-            onChange={handleInputChange}
-          >
-            <option value="None">None</option>
-            <option value="Ayushman Bharat">Ayushman Bharat</option>
-            <option value="PM-JAY">PM-JAY</option>
-            <option value="State Health Insurance">State Health Insurance</option>
-            <option value="Private Insurance">Private Insurance</option>
-          </select>
-        </div>
-        <div className={styles.formGroup}>
-          <label>Do they have chronic diseases?</label>
-          <select
-            name="chronicDiseases"
-            value={formData.chronicDiseases}
-            onChange={handleInputChange}
-          >
             <option value="No">No</option>
-            <option value="Yes">Yes</option>
           </select>
         </div>
         <div className={styles.formGroup}>
-          <label>Do they take regular medication?</label>
-          <select
-            name="regularMedication"
-            value={formData.regularMedication}
-            onChange={handleInputChange}
-          >
+          <label>Are they going to tuition or other classes?</label>
+          <select name="attendsTuitionOrOtherClasses" value={formData.attendsTuitionOrOtherClasses} onChange={handleInputChange}>
+            <option value="">Select</option>
+            <option value="Yes">Yes</option>
             <option value="No">No</option>
-            <option value="Yes">Yes</option>
           </select>
         </div>
         <div className={styles.formGroup}>
-          <label>Nearest Hospital</label>
-          <input
-            type="text"
-            name="nearestHospital"
-            value={formData.nearestHospital}
-            onChange={handleInputChange}
-          />
-        </div>
-        <div className={styles.formGroup}>
-          <label>Distance to Hospital (km)</label>
-          <input
-            type="number"
-            name="hospitalDistance"
-            value={formData.hospitalDistance}
-            onChange={handleInputChange}
-            min="0"
-            step="0.1"
-          />
-        </div>
-        <div className={styles.formGroup}>
-          <label>Do they need health help?</label>
-          <select
-            name="healthHelpNeeded"
-            value={formData.healthHelpNeeded}
-            onChange={handleInputChange}
-          >
-            <option value="No">No</option>
-            <option value="Yes">Yes</option>
-            <option value="Maybe">Maybe</option>
-          </select>
-        </div>
-        <div className={styles.formGroup}>
-          <label>Type of Health Help Needed</label>
-          <select
-            name="healthHelpType"
-            value={formData.healthHelpType}
-            onChange={handleInputChange}
-          >
-            <option value="None">None</option>
-            <option value="Medical Checkup">Medical Checkup</option>
-            <option value="Medicines">Medicines</option>
-            <option value="Surgery">Surgery</option>
-            <option value="Dental Care">Dental Care</option>
-            <option value="Eye Care">Eye Care</option>
-            <option value="Maternal Care">Maternal Care</option>
-            <option value="Child Vaccination">Child Vaccination</option>
-            <option value="Other">Other</option>
+          <label>Overall cost for kids (per year)</label>
+          <select name="overallEducationCostBracket" value={formData.overallEducationCostBracket} onChange={handleInputChange}>
+            <option value="">Select</option>
+            <option value="<10,000">Less than 10,000</option>
+            <option value="10,000-20,000">10,000 - 20,000</option>
+            <option value="20,000-30,000">20,000 - 30,000</option>
+            <option value="30,000-50,000">30,000 - 50,000</option>
+            <option value="50,000+">50,000+</option>
           </select>
         </div>
       </div>
 
-      {formData.chronicDiseases === 'Yes' && (
-        <div className={styles.formGroup}>
-          <label>Chronic Disease Details</label>
-          <textarea
-            name="chronicDiseaseDetails"
-            value={formData.chronicDiseaseDetails}
-            onChange={handleInputChange}
-          />
-        </div>
-      )}
-    </div>
-  );
-
-  const renderStep3 = () => (
-    <div className={styles.formSection}>
       <h3>Elder Care Information</h3>
       <div className={styles.formGrid}>
         <div className={styles.formGroup}>
@@ -472,46 +414,115 @@ export default function SurveyForm({ setIsLoading }) {
             <option value="Yes">Yes</option>
           </select>
         </div>
-        {formData.elderlyPension === 'Yes' && (
-          <div className={styles.formGroup}>
-            <label>Elderly Pension Amount (₹)</label>
-            <input
-              type="number"
-              name="elderlyPensionAmount"
-              value={formData.elderlyPensionAmount}
-              onChange={handleInputChange}
-              min="0"
-            />
-          </div>
-        )}
+        <div className={styles.formGroup}>
+          <label>Number of elderly (65+)</label>
+          <input type="number" name="numberOfElderlyAbove65" value={formData.numberOfElderlyAbove65} min={0} onChange={handleInputChange} />
+        </div>
+        <div className={styles.formGroup}>
+          <label>Will you take food delivered?</label>
+          <select name="willTakeFoodDelivery" value={formData.willTakeFoodDelivery} onChange={handleInputChange}>
+            <option value="">Select</option>
+            <option value="Yes">Yes</option>
+            <option value="No">No</option>
+          </select>
+        </div>
+        <div className={styles.formGroup}>
+          <label>Will you pay ₹1500 for food delivery?</label>
+          <select name="willPayForFoodDelivery" value={formData.willPayForFoodDelivery} onChange={handleInputChange}>
+            <option value="">Select</option>
+            <option value="Yes">Yes</option>
+            <option value="No">No</option>
+          </select>
+        </div>
+        <div className={styles.formGroup}>
+          <label>Will you take it if it is free?</label>
+          <select name="willTakeFoodIfFree" value={formData.willTakeFoodIfFree} onChange={handleInputChange}>
+            <option value="">Select</option>
+            <option value="Yes">Yes</option>
+            <option value="No">No</option>
+          </select>
+        </div>
+        <div className={styles.formGroup}>
+          <label>Do you need help with medicines delivery?</label>
+          <select name="needsMedicineDeliveryHelp" value={formData.needsMedicineDeliveryHelp} onChange={handleInputChange}>
+            <option value="">Select</option>
+            <option value="Yes">Yes</option>
+            <option value="No">No</option>
+          </select>
+        </div>
+        <div className={styles.formGroup}>
+          <label>Do you need help with hospital visits?</label>
+          <select name="needsHospitalVisitHelp" value={formData.needsHospitalVisitHelp} onChange={handleInputChange}>
+            <option value="">Select</option>
+            <option value="Yes">Yes</option>
+            <option value="No">No</option>
+          </select>
+        </div>
+        <div className={styles.formGroup}>
+          <label>Do you need help with checking BP/sugar, etc?</label>
+          <select name="needsHealthCheckupHelp" value={formData.needsHealthCheckupHelp} onChange={handleInputChange}>
+            <option value="">Select</option>
+            <option value="Yes">Yes</option>
+            <option value="No">No</option>
+          </select>
+        </div>
       </div>
 
-      <h3>Employment & Income Information</h3>
+      <h3>Health Information</h3>
       <div className={styles.formGrid}>
         <div className={styles.formGroup}>
-          <label>Primary Occupation</label>
-          <input
-            type="text"
-            name="primaryOccupation"
-            value={formData.primaryOccupation}
-            onChange={handleInputChange}
-          />
-        </div>
-        <div className={styles.formGroup}>
-          <label>Monthly Income (₹)</label>
-          <input
-            type="number"
-            name="monthlyIncome"
-            value={formData.monthlyIncome}
-            onChange={handleInputChange}
-            min="0"
-          />
-        </div>
-        <div className={styles.formGroup}>
-          <label>Do they need employment help?</label>
+          <label>Do they have health insurance?</label>
           <select
-            name="employmentHelpNeeded"
-            value={formData.employmentHelpNeeded}
+            name="healthInsurance"
+            value={formData.healthInsurance}
+            onChange={handleInputChange}
+          >
+            <option value="No">No</option>
+            <option value="Yes">Yes</option>
+          </select>
+        </div>
+        <div className={styles.formGroup}>
+          <label>Type of Health Insurance</label>
+          <select
+            name="healthInsuranceType"
+            value={formData.healthInsuranceType}
+            onChange={handleInputChange}
+          >
+            <option value="None">None</option>
+            <option value="Ayushman Bharat">Ayushman Bharat</option>
+            <option value="PM-JAY">PM-JAY</option>
+            <option value="State Health Insurance">State Health Insurance</option>
+            <option value="Private Insurance">Private Insurance</option>
+            <option value="Argyo Shree">Argyo Shree</option>
+          </select>
+        </div>
+        <div className={styles.formGroup}>
+          <label>Do they have chronic diseases?</label>
+          <select
+            name="chronicDiseases"
+            value={formData.chronicDiseases}
+            onChange={handleInputChange}
+          >
+            <option value="No">No</option>
+            <option value="Yes">Yes</option>
+          </select>
+        </div>
+        <div className={styles.formGroup}>
+          <label>Do they take regular medication?</label>
+          <select
+            name="regularMedication"
+            value={formData.regularMedication}
+            onChange={handleInputChange}
+          >
+            <option value="No">No</option>
+            <option value="Yes">Yes</option>
+          </select>
+        </div>
+        <div className={styles.formGroup}>
+          <label>Do they need health help?</label>
+          <select
+            name="healthHelpNeeded"
+            value={formData.healthHelpNeeded}
             onChange={handleInputChange}
           >
             <option value="No">No</option>
@@ -520,24 +531,47 @@ export default function SurveyForm({ setIsLoading }) {
           </select>
         </div>
         <div className={styles.formGroup}>
-          <label>Type of Employment Help Needed</label>
+          <label>Type of Health Help Needed</label>
           <select
-            name="employmentHelpType"
-            value={formData.employmentHelpType}
+            name="healthHelpType"
+            value={formData.healthHelpType}
             onChange={handleInputChange}
           >
             <option value="None">None</option>
-            <option value="Job Training">Job Training</option>
-            <option value="Financial Assistance">Financial Assistance</option>
-            <option value="Equipment">Equipment</option>
+            <option value="Medical Checkup">Medical Checkup</option>
+            <option value="Medicines">Medicines</option>
+            <option value="Surgery">Surgery</option>
+            <option value="Dental Care">Dental Care</option>
+            <option value="Eye Care">Eye Care</option>
+            <option value="Maternal Care">Maternal Care</option>
+            <option value="Child Vaccination">Child Vaccination</option>
             <option value="Other">Other</option>
           </select>
         </div>
+        <div className={styles.formGroup}>
+          <label>Do you have life insurance?</label>
+          <select name="hasLifeInsurance" value={formData.hasLifeInsurance} onChange={handleInputChange}>
+            <option value="">Select</option>
+            <option value="Yes">Yes</option>
+            <option value="No">No</option>
+          </select>
+        </div>
       </div>
+
+      {formData.chronicDiseases === 'Yes' && (
+        <div className={styles.formGroup}>
+          <label>Chronic Disease Details</label>
+          <textarea
+            name="chronicDiseaseDetails"
+            value={formData.chronicDiseaseDetails}
+            onChange={handleInputChange}
+          />
+        </div>
+      )}
     </div>
   );
 
-  const renderStep4 = () => (
+  const renderStep3 = () => (
     <div className={styles.formSection}>
       <h3>Bank Information</h3>
       <div className={styles.formGrid}>
@@ -552,112 +586,65 @@ export default function SurveyForm({ setIsLoading }) {
             <option value="Yes">Yes</option>
           </select>
         </div>
-        {formData.bankAccount === 'Yes' && (
-          <>
-            <div className={styles.formGroup}>
-              <label>Bank Name</label>
-              <input
-                type="text"
-                name="bankName"
-                value={formData.bankName}
-                onChange={handleInputChange}
-              />
-            </div>
-            <div className={styles.formGroup}>
-              <label>Account Number</label>
-              <input
-                type="text"
-                name="accountNumber"
-                value={formData.accountNumber}
-                onChange={handleInputChange}
-              />
-            </div>
-            <div className={styles.formGroup}>
-              <label>IFSC Code</label>
-              <input
-                type="text"
-                name="ifscCode"
-                value={formData.ifscCode}
-                onChange={handleInputChange}
-              />
-            </div>
-          </>
-        )}
       </div>
 
-      <h3>Survey Details</h3>
+      <h3>Financial Services</h3>
       <div className={styles.formGrid}>
         <div className={styles.formGroup}>
-          <label>Surveyor Name</label>
-          <input
-            type="text"
-            name="surveyorName"
-            value={formData.surveyorName}
-            onChange={handleInputChange}
-          />
-        </div>
-        <div className={styles.formGroup}>
-          <label>Priority Level</label>
-          <select
-            name="priorityLevel"
-            value={formData.priorityLevel}
-            onChange={handleInputChange}
-          >
-            <option value="Low">Low</option>
-            <option value="Medium">Medium</option>
-            <option value="High">High</option>
+          <label>Caste <span style={{color:'red'}}>*</span></label>
+          <select name="caste" value={formData.caste} onChange={handleInputChange} required>
+            <option value="">Select</option>
+            <option value="FC">FC</option>
+            <option value="BC">BC</option>
+            <option value="SC">SC</option>
           </select>
         </div>
         <div className={styles.formGroup}>
-          <label>Status</label>
-          <select
-            name="status"
-            value={formData.status}
-            onChange={handleInputChange}
-          >
-            <option value="Surveyed">Surveyed</option>
-            <option value="Under Review">Under Review</option>
-            <option value="Assistance Provided">Assistance Provided</option>
-            <option value="Follow-up Required">Follow-up Required</option>
+          <label>Profession</label>
+          <select name="profession" value={formData.profession} onChange={handleInputChange}>
+            <option value="">Select</option>
+            <option value="Agriculture">Agriculture</option>
+            <option value="Job">Job</option>
+            <option value="Not working">Not working</option>
           </select>
         </div>
         <div className={styles.formGroup}>
-          <label>Do they need immediate help?</label>
-          <select
-            name="needsImmediateHelp"
-            value={formData.needsImmediateHelp}
-            onChange={handleInputChange}
-          >
-            <option value="No">No</option>
+          <label>Monthly Income Bracket</label>
+          <select name="monthlyIncomeBracket" value={formData.monthlyIncomeBracket} onChange={handleInputChange}>
+            <option value="">Select</option>
+            <option value="<10,000">Less than 10,000</option>
+            <option value="10,000-20,000">10,000 - 20,000</option>
+            <option value="20,000-30,000">20,000 - 30,000</option>
+            <option value="30,000-50,000">30,000 - 50,000</option>
+            <option value="50,000+">50,000+</option>
+          </select>
+        </div>
+        <div className={styles.formGroup}>
+          <label>Do you need help opening a fixed deposit? <span style={{color:'red'}}>*</span></label>
+          <select name="helpOpeningFixedDeposit" value={formData.helpOpeningFixedDeposit} onChange={handleInputChange} required>
+            <option value="">Select</option>
             <option value="Yes">Yes</option>
-            <option value="Maybe">Maybe</option>
+            <option value="No">No</option>
           </select>
         </div>
         <div className={styles.formGroup}>
-          <label>Help Priority</label>
-          <select
-            name="helpPriority"
-            value={formData.helpPriority}
-            onChange={handleInputChange}
-          >
-            <option value="None">None</option>
-            <option value="Low">Low</option>
-            <option value="Medium">Medium</option>
-            <option value="High">High</option>
-            <option value="Very High">Very High</option>
+          <label>Do you need help taking a loan?</label>
+          <select name="helpTakingLoan" value={formData.helpTakingLoan} onChange={handleInputChange}>
+            <option value="">Select</option>
+            <option value="Yes">Yes</option>
+            <option value="No">No</option>
+          </select>
+        </div>
+        <div className={styles.formGroup}>
+          <label>Do you need help with digital payments?</label>
+          <select name="helpWithDigitalPayments" value={formData.helpWithDigitalPayments} onChange={handleInputChange}>
+            <option value="">Select</option>
+            <option value="Yes">Yes</option>
+            <option value="No">No</option>
           </select>
         </div>
       </div>
-
-      <div className={styles.formGroup}>
-        <label>Notes</label>
-        <textarea
-          name="notes"
-          value={formData.notes}
-          onChange={handleInputChange}
-          rows="4"
-        />
-      </div>
+      {step3Error && <div className={styles.error}>{step3Error}</div>}
     </div>
   );
 
@@ -666,7 +653,6 @@ export default function SurveyForm({ setIsLoading }) {
       case 1: return renderStep1();
       case 2: return renderStep2();
       case 3: return renderStep3();
-      case 4: return renderStep4();
       default: return renderStep1();
     }
   };
@@ -674,16 +660,16 @@ export default function SurveyForm({ setIsLoading }) {
   return (
     <div className={styles.surveyForm}>
       <div className={styles.formHeader}>
-        <h2>Family Survey Form - Step {currentStep} of 4</h2>
+        <h2>Family Survey Form - Step {currentStep} of 3</h2>
         <div className={styles.progressBar}>
           <div 
             className={styles.progressFill} 
-            style={{ width: `${(currentStep / 4) * 100}%` }}
+            style={{ width: `${(currentStep / 3) * 100}%` }}
           ></div>
         </div>
       </div>
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} onKeyDown={e => { if (e.key === 'Enter' && currentStep !== 3) e.preventDefault(); }}>
         {renderStepContent()}
 
         {message && (
@@ -699,7 +685,7 @@ export default function SurveyForm({ setIsLoading }) {
             </button>
           )}
           
-          {currentStep < 4 ? (
+          {currentStep < 3 ? (
             <button type="button" onClick={nextStep} className={styles.primaryButton}>
               Next
             </button>

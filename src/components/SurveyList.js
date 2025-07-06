@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import styles from '../styles/SurveyList.module.css';
+import { saveAs } from 'file-saver';
 
 export default function SurveyList() {
   const [surveys, setSurveys] = useState([]);
@@ -89,6 +90,32 @@ export default function SurveyList() {
     }
   };
 
+  const exportToCSV = () => {
+    if (!surveys.length) return;
+    const replacer = (key, value) => (value === null || value === undefined ? '' : value);
+    const header = Object.keys(surveys[0]);
+    const csv = [
+      header.join(','),
+      ...surveys.map(row => header.map(fieldName => JSON.stringify(row[fieldName], replacer)).join(','))
+    ].join('\r\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    saveAs(blob, 'survey_results.csv');
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this survey?')) return;
+    try {
+      const res = await fetch(`/api/survey/${id}`, { method: 'DELETE' });
+      if (res.ok) {
+        setSurveys(surveys.filter(s => s._id !== id));
+      } else {
+        alert('Failed to delete survey.');
+      }
+    } catch (err) {
+      alert('Error deleting survey.');
+    }
+  };
+
   if (loading) {
     return (
       <div className={styles.loadingContainer}>
@@ -114,7 +141,7 @@ export default function SurveyList() {
           <input
             type="text"
             name="search"
-            placeholder="Search by family name, head of family, or BPL number..."
+            placeholder="Search by family name, head of family..."
             value={filters.search}
             onChange={handleFilterChange}
             className={styles.searchInput}
@@ -177,74 +204,44 @@ export default function SurveyList() {
         </div>
       </div>
 
+      {/* Export Button */}
+      <button onClick={exportToCSV} className={styles.exportButton}>Export to CSV</button>
+
       {/* Survey Table */}
       <div className={styles.tableContainer}>
         <table className={styles.surveyTable}>
           <thead>
             <tr>
-              <th>Family Name</th>
-              <th>Head of Family</th>
+              <th>Full Name</th>
               <th>Contact</th>
               <th>Family Size</th>
-              <th>Income (₹)</th>
-              <th>Help Needed</th>
+              <th>Monthly Income</th>
               <th>Help Priority</th>
               <th>Status</th>
               <th>Survey Date</th>
+              <th>Caste</th>
+              <th>Profession</th>
               <th>Action</th>
+              <th>Delete</th>
             </tr>
           </thead>
           <tbody>
             {surveys.map((survey) => (
               <tr key={survey._id} className={styles.surveyRow}>
-                <td>
-                  <div className={styles.familyInfo}>
-                    <strong>{survey.familyName}</strong>
-                    {survey.bplCardNumber && (
-                      <small>BPL: {survey.bplCardNumber}</small>
-                    )}
-                  </div>
-                </td>
-                <td>{survey.headOfFamily}</td>
+                <td>{survey.fullName}</td>
                 <td>{survey.contactNumber}</td>
-                <td>
-                  <div className={styles.familyStats}>
-                    <span>{survey.totalFamilyMembers}</span>
-                    {survey.childrenUnder18 > 0 && (
-                      <small>👶 {survey.childrenUnder18}</small>
-                    )}
-                    {survey.elderlyAbove85 > 0 && (
-                      <small>👴 {survey.elderlyAbove85}</small>
-                    )}
-                  </div>
-                </td>
-                <td>{survey.monthlyIncome.toLocaleString('en-IN')}</td>
-                <td>
-                  <span className={`${styles.helpBadge} ${survey.needsImmediateHelp === 'Yes' ? styles.needsHelp : survey.needsImmediateHelp === 'Maybe' ? styles.maybeHelp : styles.noHelp}`}>
-                    {survey.needsImmediateHelp}
-                  </span>
-                </td>
-                <td>
-                  <span className={`${styles.helpPriorityBadge} ${getHelpPriorityColor(survey.helpPriority)}`}>
-                    {survey.helpPriority}
-                  </span>
-                </td>
-                <td>
-                  <span className={`${styles.statusBadge} ${getStatusColor(survey.status)}`}>
-                    {survey.status}
-                  </span>
-                </td>
+                <td>{survey.totalFamilyMembers}</td>
+                <td>{survey.monthlyIncome}</td>
+                <td>{survey.helpPriority}</td>
+                <td>{survey.status}</td>
                 <td>{formatDate(survey.surveyDate)}</td>
+                <td>{survey.caste}</td>
+                <td>{survey.profession}</td>
                 <td>
-                  <button
-                    className={styles.viewButton}
-                    onClick={() => {
-                      setSelectedSurvey(survey);
-                      setShowModal(true);
-                    }}
-                  >
-                    View
-                  </button>
+                  <button className={styles.viewButton} onClick={() => { setSelectedSurvey(survey); setShowModal(true); }}>View</button>
+                </td>
+                <td>
+                  <button onClick={() => handleDelete(survey._id)} className={styles.deleteButton}>Delete</button>
                 </td>
               </tr>
             ))}
@@ -320,10 +317,6 @@ export default function SurveyList() {
                   <div className={styles.detailItem}>
                     <label>BPL Card Number:</label>
                     <span>{selectedSurvey.bplCardNumber || 'Not provided'}</span>
-                  </div>
-                  <div className={styles.detailItem}>
-                    <label>Aadhar Number:</label>
-                    <span>{selectedSurvey.aadharNumber || 'Not provided'}</span>
                   </div>
                 </div>
               </div>
@@ -485,9 +478,9 @@ export default function SurveyList() {
                 </div>
               </div>
 
-              {/* Bank Details */}
+              {/* Financial Services */}
               <div className={styles.detailSection}>
-                <h3>🏦 Bank Details</h3>
+                <h3>🏦 Financial Services</h3>
                 <div className={styles.detailGrid}>
                   <div className={styles.detailItem}>
                     <label>Bank Account:</label>
@@ -508,6 +501,18 @@ export default function SurveyList() {
                       <div className={styles.detailItem}>
                         <label>IFSC Code:</label>
                         <span>{selectedSurvey.ifscCode}</span>
+                      </div>
+                      <div className={styles.detailItem}>
+                        <label>Help Opening Fixed Deposit:</label>
+                        <span>{selectedSurvey.helpOpeningFixedDeposit}</span>
+                      </div>
+                      <div className={styles.detailItem}>
+                        <label>Help Taking Loan:</label>
+                        <span>{selectedSurvey.helpTakingLoan}</span>
+                      </div>
+                      <div className={styles.detailItem}>
+                        <label>Help With Digital Payments:</label>
+                        <span>{selectedSurvey.helpWithDigitalPayments}</span>
                       </div>
                     </>
                   )}
