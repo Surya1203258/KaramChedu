@@ -2,10 +2,22 @@ import dbConnect from '../../../lib/dbConnect';
 import KaramCheduSurvey from '../../../models/KaramCheduSurvey';
 
 export default async function handler(req, res) {
-  await dbConnect();
+  try {
+    console.log('Connecting to database...');
+    await dbConnect();
+    console.log('Database connected successfully');
+  } catch (error) {
+    console.error('Database connection failed:', error);
+    return res.status(500).json({ 
+      success: false, 
+      error: 'Database connection failed',
+      details: error.message 
+    });
+  }
 
   if (req.method === 'POST') {
     try {
+      console.log('Processing survey submission...');
       const surveyData = req.body;
       
       // Set default values for new fields
@@ -14,14 +26,22 @@ export default async function handler(req, res) {
         surveyDate: new Date()
       });
 
+      console.log('Saving survey to database...');
       const savedSurvey = await survey.save();
+      console.log('Survey saved successfully:', savedSurvey._id);
+      
       res.status(201).json({ success: true, data: savedSurvey });
     } catch (error) {
       console.error('Error creating survey:', error);
-      res.status(500).json({ success: false, error: error?.message || JSON.stringify(error) || 'Failed to create survey' });
+      res.status(500).json({ 
+        success: false, 
+        error: error?.message || 'Failed to create survey',
+        details: error.toString()
+      });
     }
   } else if (req.method === 'GET') {
     try {
+      console.log('Fetching surveys...');
       const { page = 1, limit = 10, search = '', status = '', priorityLevel = '', needsImmediateHelp = '', helpPriority = '' } = req.query;
       
       const skip = (parseInt(page) - 1) * parseInt(limit);
@@ -60,6 +80,8 @@ export default async function handler(req, res) {
       const total = await KaramCheduSurvey.countDocuments(filter);
       const totalPages = Math.ceil(total / parseInt(limit));
 
+      console.log(`Found ${surveys.length} surveys out of ${total} total`);
+
       res.status(200).json({
         success: true,
         data: surveys,
@@ -72,7 +94,11 @@ export default async function handler(req, res) {
       });
     } catch (error) {
       console.error('Error fetching surveys:', error);
-      res.status(500).json({ success: false, error: 'Failed to fetch surveys' });
+      res.status(500).json({ 
+        success: false, 
+        error: 'Failed to fetch surveys',
+        details: error.message 
+      });
     }
   } else {
     res.status(405).json({ success: false, error: 'Method not allowed' });

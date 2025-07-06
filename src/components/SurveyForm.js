@@ -101,6 +101,7 @@ export default function SurveyForm({ setIsLoading }) {
     }
 
     try {
+      console.log('Submitting survey data...');
       const response = await fetch('/api/survey', {
         method: 'POST',
         headers: {
@@ -109,11 +110,23 @@ export default function SurveyForm({ setIsLoading }) {
         body: JSON.stringify(formData),
       });
 
+      console.log('Response status:', response.status);
+      console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+
       let result;
       try {
-        result = await response.json();
+        const responseText = await response.text();
+        console.log('Response text:', responseText);
+        
+        if (!responseText) {
+          throw new Error('Empty response from server');
+        }
+        
+        result = JSON.parse(responseText);
       } catch (jsonError) {
-        setMessage('Error saving survey data: Invalid server response (not JSON)');
+        console.error('JSON parsing error:', jsonError);
+        console.error('Response was not valid JSON');
+        setMessage(`Error saving survey data: Server returned invalid response (Status: ${response.status}). Please check the server logs.`);
         setIsLoading(false);
         return;
       }
@@ -176,10 +189,13 @@ export default function SurveyForm({ setIsLoading }) {
         });
         setCurrentStep(1);
       } else {
-        setMessage('Error saving survey data: ' + (result.error || JSON.stringify(result.details) || 'Unknown error'));
+        const errorMessage = result.error || result.details || 'Unknown error';
+        console.error('Server error:', errorMessage);
+        setMessage(`Error saving survey data: ${errorMessage}`);
       }
     } catch (error) {
-      setMessage('Error saving survey data: ' + (error.message || 'Unknown error'));
+      console.error('Network or other error:', error);
+      setMessage(`Error saving survey data: ${error.message || 'Network error - please check your connection'}`);
     } finally {
       setIsLoading(false);
     }

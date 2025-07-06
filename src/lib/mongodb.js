@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 const MONGODB_URI = process.env.MONGODB_URI;
 
 if (!MONGODB_URI) {
+  console.error('MONGODB_URI is not defined in environment variables');
   throw new Error('Please define the MONGODB_URI environment variable inside .env.local');
 }
 
@@ -22,8 +23,13 @@ async function connectDB() {
       bufferCommands: false,
     };
 
+    console.log('Connecting to MongoDB...');
     cached.promise = mongoose.connect(MONGODB_URI, opts).then((mongoose) => {
+      console.log('MongoDB connected successfully');
       return mongoose;
+    }).catch((error) => {
+      console.error('MongoDB connection error:', error);
+      throw error;
     });
   }
 
@@ -31,6 +37,7 @@ async function connectDB() {
     cached.conn = await cached.promise;
   } catch (e) {
     cached.promise = null;
+    console.error('Failed to connect to MongoDB:', e);
     throw e;
   }
 
