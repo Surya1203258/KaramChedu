@@ -6,6 +6,11 @@ const nextConfig = {
     NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
     NEXTAUTH_URL: process.env.NEXTAUTH_URL,
   },
+  // Render-specific optimizations
+  output: 'standalone',
+  experimental: {
+    serverComponentsExternalPackages: ['mongoose']
+  }
 };
 
 export default nextConfig;
