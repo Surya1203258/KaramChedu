@@ -54,4 +54,4 @@ const KaramCheduSurveySchema = new mongoose.Schema({
   familyMemberNames: [{ type: String, trim: true }]
 }, { timestamps: true });
 
-export default mongoose.models.KaramCheduSurvey || mongoose.model('KaramCheduSurvey', KaramCheduSurveySchema, 'KaramCheduSurvey'); 
+export default mongoose.models.KaramCheduSurvey || mongoose.model('KaramCheduSurvey', KaramCheduSurveySchema, 'VillageSurvey2024'); 
