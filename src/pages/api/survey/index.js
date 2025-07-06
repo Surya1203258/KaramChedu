@@ -2,6 +2,13 @@ import dbConnect from '../../../lib/dbConnect';
 import KaramCheduSurvey from '../../../models/KaramCheduSurvey';
 
 export default async function handler(req, res) {
+  console.log('=== SURVEY API CALLED ===');
+  console.log('Method:', req.method);
+  console.log('URL:', req.url);
+  console.log('Headers:', req.headers);
+  console.log('Body:', req.body);
+  console.log('Query:', req.query);
+
   try {
     console.log('Connecting to database...');
     await dbConnect();
@@ -101,6 +108,12 @@ export default async function handler(req, res) {
       });
     }
   } else {
-    res.status(405).json({ success: false, error: 'Method not allowed' });
+    console.log('Method not allowed:', req.method);
+    res.status(405).json({ 
+      success: false, 
+      error: 'Method not allowed',
+      allowedMethods: ['GET', 'POST'],
+      receivedMethod: req.method
+    });
   }
 } 
