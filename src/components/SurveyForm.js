@@ -591,12 +591,13 @@ export default function SurveyForm({ setIsLoading }) {
       <h3>Financial Services</h3>
       <div className={styles.formGrid}>
         <div className={styles.formGroup}>
-          <label>Caste <span style={{color:'red'}}>*</span></label>
-          <select name="caste" value={formData.caste} onChange={handleInputChange} required>
+          <label>Caste</label>
+          <select name="caste" value={formData.caste} onChange={handleInputChange}>
             <option value="">Select</option>
             <option value="FC">FC</option>
             <option value="BC">BC</option>
             <option value="SC">SC</option>
+            <option value="Prefer not to say">Prefer not to say</option>
           </select>
         </div>
         <div className={styles.formGroup}>
