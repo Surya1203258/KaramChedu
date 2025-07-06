@@ -109,7 +109,14 @@ export default function SurveyForm({ setIsLoading }) {
         body: JSON.stringify(formData),
       });
 
-      const result = await response.json();
+      let result;
+      try {
+        result = await response.json();
+      } catch (jsonError) {
+        setMessage('Error saving survey data: Invalid server response (not JSON)');
+        setIsLoading(false);
+        return;
+      }
 
       if (result.success) {
         setMessage('Survey data saved successfully!');
