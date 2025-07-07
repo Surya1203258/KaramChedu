@@ -76,6 +76,23 @@
   box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
 }
 
+/* Export Button */
+.exportButton {
+  background: #28a745;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  margin-bottom: 20px;
+}
+
+.exportButton:hover {
+  background: #218838;
+}
+
 /* Table Container */
 .tableContainer {
   background: white;
@@ -323,6 +340,22 @@
 
 .viewButton:hover {
   background: #0056b3;
+}
+
+/* Delete Button */
+.deleteButton {
+  padding: 6px 12px;
+  background: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: background-color 0.2s;
+}
+
+.deleteButton:hover {
+  background: #c82333;
 }
 
 /* Modal Styles */

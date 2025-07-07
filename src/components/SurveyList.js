@@ -188,7 +188,7 @@ export default function SurveyList() {
           <input
             type="text"
             name="search"
-            placeholder="Search by family name, head of family..."
+            placeholder="Search by full name, contact number..."
             value={filters.search}
             onChange={handleFilterChange}
             className={styles.searchInput}
@@ -219,19 +219,6 @@ export default function SurveyList() {
             <option value="High">High Priority</option>
             <option value="Medium">Medium Priority</option>
             <option value="Low">Low Priority</option>
-          </select>
-        </div>
-        <div className={styles.filterGroup}>
-          <select
-            name="needsImmediateHelp"
-            value={filters.needsImmediateHelp}
-            onChange={handleFilterChange}
-            className={styles.filterSelect}
-          >
-            <option value="">All Help Status</option>
-            <option value="Yes">Needs Immediate Help</option>
-            <option value="Maybe">Maybe Needs Help</option>
-            <option value="No">No Help Needed</option>
           </select>
         </div>
         <div className={styles.filterGroup}>
@@ -278,12 +265,20 @@ export default function SurveyList() {
                 <td>{survey.fullName}</td>
                 <td>{survey.contactNumber}</td>
                 <td>{survey.totalFamilyMembers}</td>
-                <td>{survey.monthlyIncome}</td>
-                <td>{survey.helpPriority}</td>
-                <td>{survey.status}</td>
+                <td>₹{survey.monthlyIncome?.toLocaleString('en-IN') || '0'}</td>
+                <td>
+                  <span className={`${styles.helpPriorityBadge} ${getHelpPriorityColor(survey.helpPriority)}`}>
+                    {survey.helpPriority}
+                  </span>
+                </td>
+                <td>
+                  <span className={`${styles.statusBadge} ${getStatusColor(survey.status)}`}>
+                    {survey.status}
+                  </span>
+                </td>
                 <td>{formatDate(survey.surveyDate)}</td>
-                <td>{survey.caste}</td>
-                <td>{survey.profession}</td>
+                <td>{survey.caste || 'Not specified'}</td>
+                <td>{survey.profession || 'Not specified'}</td>
                 <td>
                   <button className={styles.viewButton} onClick={() => { setSelectedSurvey(survey); setShowModal(true); }}>View</button>
                 </td>
@@ -337,7 +332,7 @@ export default function SurveyList() {
         <div className={styles.modalOverlay} onClick={() => setShowModal(false)}>
           <div className={styles.modal} onClick={e => e.stopPropagation()}>
             <div className={styles.modalHeader}>
-              <h2>Survey Details - {selectedSurvey.familyName}</h2>
+              <h2>Survey Details - {selectedSurvey.fullName}</h2>
               <button className={styles.closeButton} onClick={() => setShowModal(false)}>×</button>
             </div>
             <div className={styles.modalBody}>
@@ -346,12 +341,8 @@ export default function SurveyList() {
                 <h3>📋 Basic Information</h3>
                 <div className={styles.detailGrid}>
                   <div className={styles.detailItem}>
-                    <label>Family Name:</label>
-                    <span>{selectedSurvey.familyName}</span>
-                  </div>
-                  <div className={styles.detailItem}>
-                    <label>Head of Family:</label>
-                    <span>{selectedSurvey.headOfFamily}</span>
+                    <label>Full Name:</label>
+                    <span>{selectedSurvey.fullName}</span>
                   </div>
                   <div className={styles.detailItem}>
                     <label>Contact Number:</label>
@@ -360,10 +351,6 @@ export default function SurveyList() {
                   <div className={styles.detailItem}>
                     <label>Address:</label>
                     <span>{selectedSurvey.address}</span>
-                  </div>
-                  <div className={styles.detailItem}>
-                    <label>BPL Card Number:</label>
-                    <span>{selectedSurvey.bplCardNumber || 'Not provided'}</span>
                   </div>
                 </div>
               </div>
@@ -381,13 +368,25 @@ export default function SurveyList() {
                     <span>{selectedSurvey.childrenUnder18}</span>
                   </div>
                   <div className={styles.detailItem}>
-                    <label>Elderly Above 85:</label>
-                    <span>{selectedSurvey.elderlyAbove85}</span>
+                    <label>Elderly Above 65:</label>
+                    <span>{selectedSurvey.elderlyAbove65}</span>
                   </div>
                   <div className={styles.detailItem}>
                     <label>Disabled Members:</label>
                     <span>{selectedSurvey.disabledMembers}</span>
                   </div>
+                  {selectedSurvey.familyMembers && selectedSurvey.familyMembers.length > 0 && (
+                    <div className={styles.detailItem}>
+                      <label>Family Members:</label>
+                      <div>
+                        {selectedSurvey.familyMembers.map((member, index) => (
+                          <div key={index} style={{ marginBottom: '8px', padding: '8px', background: '#f8f9fa', borderRadius: '4px' }}>
+                            <strong>{member.name}</strong> - Age: {member.age}, Contact: {member.contact}, Employed: {member.employed}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -412,6 +411,22 @@ export default function SurveyList() {
                   <div className={styles.detailItem}>
                     <label>Education Help Type:</label>
                     <span>{selectedSurvey.educationHelpType}</span>
+                  </div>
+                  <div className={styles.detailItem}>
+                    <label>Attends Private School:</label>
+                    <span className={selectedSurvey.attendsPrivateSchool === 'Yes' ? styles.yes : styles.no}>
+                      {selectedSurvey.attendsPrivateSchool || 'Not specified'}
+                    </span>
+                  </div>
+                  <div className={styles.detailItem}>
+                    <label>Attends Tuition/Other Classes:</label>
+                    <span className={selectedSurvey.attendsTuitionOrOtherClasses === 'Yes' ? styles.yes : styles.no}>
+                      {selectedSurvey.attendsTuitionOrOtherClasses || 'Not specified'}
+                    </span>
+                  </div>
+                  <div className={styles.detailItem}>
+                    <label>Overall Education Cost Bracket:</label>
+                    <span>{selectedSurvey.overallEducationCostBracket || 'Not specified'}</span>
                   </div>
                 </div>
               </div>
@@ -468,6 +483,12 @@ export default function SurveyList() {
                     <label>Health Help Type:</label>
                     <span>{selectedSurvey.healthHelpType}</span>
                   </div>
+                  <div className={styles.detailItem}>
+                    <label>Life Insurance:</label>
+                    <span className={selectedSurvey.hasLifeInsurance === 'Yes' ? styles.yes : styles.no}>
+                      {selectedSurvey.hasLifeInsurance || 'Not specified'}
+                    </span>
+                  </div>
                 </div>
               </div>
 
@@ -491,12 +512,40 @@ export default function SurveyList() {
                       {selectedSurvey.elderlyPension}
                     </span>
                   </div>
-                  {selectedSurvey.elderlyPension === 'Yes' && (
-                    <div className={styles.detailItem}>
-                      <label>Pension Amount (₹):</label>
-                      <span>{selectedSurvey.elderlyPensionAmount.toLocaleString('en-IN')}</span>
-                    </div>
-                  )}
+                  <div className={styles.detailItem}>
+                    <label>Number of Elderly (65+):</label>
+                    <span>{selectedSurvey.numberOfElderlyAbove65}</span>
+                  </div>
+                  <div className={styles.detailItem}>
+                    <label>Will Take Food Delivery:</label>
+                    <span className={selectedSurvey.willTakeFoodDelivery === 'Yes' ? styles.yes : styles.no}>
+                      {selectedSurvey.willTakeFoodDelivery || 'Not specified'}
+                    </span>
+                  </div>
+                  <div className={styles.detailItem}>
+                    <label>Will Pay for Food Delivery:</label>
+                    <span className={selectedSurvey.willPayForFoodDelivery === 'Yes' ? styles.yes : styles.no}>
+                      {selectedSurvey.willPayForFoodDelivery || 'Not specified'}
+                    </span>
+                  </div>
+                  <div className={styles.detailItem}>
+                    <label>Needs Medicine Delivery Help:</label>
+                    <span className={selectedSurvey.needsMedicineDeliveryHelp === 'Yes' ? styles.yes : styles.no}>
+                      {selectedSurvey.needsMedicineDeliveryHelp || 'Not specified'}
+                    </span>
+                  </div>
+                  <div className={styles.detailItem}>
+                    <label>Needs Hospital Visit Help:</label>
+                    <span className={selectedSurvey.needsHospitalVisitHelp === 'Yes' ? styles.yes : styles.no}>
+                      {selectedSurvey.needsHospitalVisitHelp || 'Not specified'}
+                    </span>
+                  </div>
+                  <div className={styles.detailItem}>
+                    <label>Needs Health Checkup Help:</label>
+                    <span className={selectedSurvey.needsHealthCheckupHelp === 'Yes' ? styles.yes : styles.no}>
+                      {selectedSurvey.needsHealthCheckupHelp || 'Not specified'}
+                    </span>
+                  </div>
                 </div>
               </div>
 
@@ -510,7 +559,11 @@ export default function SurveyList() {
                   </div>
                   <div className={styles.detailItem}>
                     <label>Monthly Income (₹):</label>
-                    <span>{selectedSurvey.monthlyIncome.toLocaleString('en-IN')}</span>
+                    <span>{selectedSurvey.monthlyIncome?.toLocaleString('en-IN') || '0'}</span>
+                  </div>
+                  <div className={styles.detailItem}>
+                    <label>Monthly Income Bracket:</label>
+                    <span>{selectedSurvey.monthlyIncomeBracket || 'Not specified'}</span>
                   </div>
                   <div className={styles.detailItem}>
                     <label>Employment Help Needed:</label>
@@ -521,6 +574,24 @@ export default function SurveyList() {
                   <div className={styles.detailItem}>
                     <label>Employment Help Type:</label>
                     <span>{selectedSurvey.employmentHelpType}</span>
+                  </div>
+                  <div className={styles.detailItem}>
+                    <label>Open to Skills Development:</label>
+                    <span className={selectedSurvey.openToSkillsDevelopment === 'Yes' ? styles.yes : selectedSurvey.openToSkillsDevelopment === 'Maybe' ? styles.maybe : styles.no}>
+                      {selectedSurvey.openToSkillsDevelopment || 'Not specified'}
+                    </span>
+                  </div>
+                  <div className={styles.detailItem}>
+                    <label>Open to Vocational Training:</label>
+                    <span className={selectedSurvey.openToVocationalTraining === 'Yes' ? styles.yes : selectedSurvey.openToVocationalTraining === 'Maybe' ? styles.maybe : styles.no}>
+                      {selectedSurvey.openToVocationalTraining || 'Not specified'}
+                    </span>
+                  </div>
+                  <div className={styles.detailItem}>
+                    <label>Willing to Relocate:</label>
+                    <span className={selectedSurvey.willingToRelocate === 'Yes' ? styles.yes : selectedSurvey.willingToRelocate === 'Maybe' ? styles.maybe : styles.no}>
+                      {selectedSurvey.willingToRelocate || 'Not specified'}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -535,34 +606,39 @@ export default function SurveyList() {
                       {selectedSurvey.bankAccount}
                     </span>
                   </div>
-                  {selectedSurvey.bankAccount === 'Yes' && (
-                    <>
-                      <div className={styles.detailItem}>
-                        <label>Bank Name:</label>
-                        <span>{selectedSurvey.bankName}</span>
-                      </div>
-                      <div className={styles.detailItem}>
-                        <label>Account Number:</label>
-                        <span>{selectedSurvey.accountNumber}</span>
-                      </div>
-                      <div className={styles.detailItem}>
-                        <label>IFSC Code:</label>
-                        <span>{selectedSurvey.ifscCode}</span>
-                      </div>
-                      <div className={styles.detailItem}>
-                        <label>Help Opening Fixed Deposit:</label>
-                        <span>{selectedSurvey.helpOpeningFixedDeposit}</span>
-                      </div>
-                      <div className={styles.detailItem}>
-                        <label>Help Taking Loan:</label>
-                        <span>{selectedSurvey.helpTakingLoan}</span>
-                      </div>
-                      <div className={styles.detailItem}>
-                        <label>Help With Digital Payments:</label>
-                        <span>{selectedSurvey.helpWithDigitalPayments}</span>
-                      </div>
-                    </>
-                  )}
+                  <div className={styles.detailItem}>
+                    <label>Help Opening Fixed Deposit:</label>
+                    <span className={selectedSurvey.helpOpeningFixedDeposit === 'Yes' ? styles.yes : styles.no}>
+                      {selectedSurvey.helpOpeningFixedDeposit || 'Not specified'}
+                    </span>
+                  </div>
+                  <div className={styles.detailItem}>
+                    <label>Help Taking Loan:</label>
+                    <span className={selectedSurvey.helpTakingLoan === 'Yes' ? styles.yes : styles.no}>
+                      {selectedSurvey.helpTakingLoan || 'Not specified'}
+                    </span>
+                  </div>
+                  <div className={styles.detailItem}>
+                    <label>Help With Digital Payments:</label>
+                    <span className={selectedSurvey.helpWithDigitalPayments === 'Yes' ? styles.yes : styles.no}>
+                      {selectedSurvey.helpWithDigitalPayments || 'Not specified'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Demographics */}
+              <div className={styles.detailSection}>
+                <h3>🗂️ Demographics</h3>
+                <div className={styles.detailGrid}>
+                  <div className={styles.detailItem}>
+                    <label>Caste:</label>
+                    <span>{selectedSurvey.caste || 'Not specified'}</span>
+                  </div>
+                  <div className={styles.detailItem}>
+                    <label>Profession:</label>
+                    <span>{selectedSurvey.profession || 'Not specified'}</span>
+                  </div>
                 </div>
               </div>
 
@@ -570,12 +646,6 @@ export default function SurveyList() {
               <div className={styles.detailSection}>
                 <h3>🆘 Help Assessment</h3>
                 <div className={styles.detailGrid}>
-                  <div className={styles.detailItem}>
-                    <label>Needs Immediate Help:</label>
-                    <span className={selectedSurvey.needsImmediateHelp === 'Yes' ? styles.yes : selectedSurvey.needsImmediateHelp === 'Maybe' ? styles.maybe : styles.no}>
-                      {selectedSurvey.needsImmediateHelp}
-                    </span>
-                  </div>
                   <div className={styles.detailItem}>
                     <label>Help Priority:</label>
                     <span className={`${styles.helpPriorityBadge} ${getHelpPriorityColor(selectedSurvey.helpPriority)}`}>
