@@ -13,6 +13,9 @@ export default function SurveyForm({ setIsLoading }) {
     childrenUnder18: 0,
     elderlyAbove65: 0,
     disabledMembers: 0,
+    familyMembers: [
+      { name: '', age: '', contact: '', employed: 'No' }
+    ],
     
     // Education Information
     childrenInSchool: 0,
@@ -65,14 +68,12 @@ export default function SurveyForm({ setIsLoading }) {
     numberOfElderlyAbove65: 0,
     willTakeFoodDelivery: '',
     willPayForFoodDelivery: '',
-    willTakeFoodIfFree: '',
     needsMedicineDeliveryHelp: '',
     needsHospitalVisitHelp: '',
     needsHealthCheckupHelp: '',
     helpOpeningFixedDeposit: '',
     helpTakingLoan: '',
     helpWithDigitalPayments: '',
-    familyMemberNames: ['']
   });
 
   const [currentStep, setCurrentStep] = useState(1);
@@ -178,14 +179,13 @@ export default function SurveyForm({ setIsLoading }) {
           numberOfElderlyAbove65: 0,
           willTakeFoodDelivery: '',
           willPayForFoodDelivery: '',
-          willTakeFoodIfFree: '',
           needsMedicineDeliveryHelp: '',
           needsHospitalVisitHelp: '',
           needsHealthCheckupHelp: '',
           helpOpeningFixedDeposit: '',
           helpTakingLoan: '',
           helpWithDigitalPayments: '',
-          familyMemberNames: ['']
+          familyMembers: [{ name: '', age: '', contact: '', employed: 'No' }]
         });
         setCurrentStep(1);
       } else {
@@ -222,29 +222,6 @@ export default function SurveyForm({ setIsLoading }) {
           />
         </div>
         <div className={styles.formGroup}>
-          <label>Family Member Names</label>
-          {formData.familyMemberNames.map((name, idx) => (
-            <div key={idx} style={{ display: 'flex', alignItems: 'center', marginBottom: 4 }}>
-              <input
-                type="text"
-                value={name}
-                onChange={e => {
-                  const updated = [...formData.familyMemberNames];
-                  updated[idx] = e.target.value;
-                  setFormData(f => ({ ...f, familyMemberNames: updated }));
-                }}
-                placeholder={`Member ${idx + 1}`}
-                style={{ flex: 1 }}
-              />
-              <button type="button" onClick={() => {
-                const updated = formData.familyMemberNames.filter((_, i) => i !== idx);
-                setFormData(f => ({ ...f, familyMemberNames: updated.length ? updated : [''] }));
-              }} style={{ marginLeft: 8 }} disabled={formData.familyMemberNames.length === 1}>Remove</button>
-            </div>
-          ))}
-          <button type="button" onClick={() => setFormData(f => ({ ...f, familyMemberNames: [...f.familyMemberNames, ''] }))}>Add Member</button>
-        </div>
-        <div className={styles.formGroup}>
           <label>Contact Number *</label>
           <input
             type="tel"
@@ -264,7 +241,6 @@ export default function SurveyForm({ setIsLoading }) {
           />
         </div>
       </div>
-
       <h3>Family Composition</h3>
       <div className={styles.formGrid}>
         <div className={styles.formGroup}>
@@ -309,6 +285,72 @@ export default function SurveyForm({ setIsLoading }) {
           />
         </div>
       </div>
+      <h4>Family Members</h4>
+      {formData.familyMembers.map((member, idx) => (
+        <div key={idx} className={styles.formGrid} style={{ marginBottom: 8 }}>
+          <div className={styles.formGroup}>
+            <label>Name</label>
+            <input
+              type="text"
+              value={member.name}
+              onChange={e => {
+                const updated = [...formData.familyMembers];
+                updated[idx].name = e.target.value;
+                setFormData(f => ({ ...f, familyMembers: updated }));
+              }}
+              placeholder={`Member ${idx + 1} Name`}
+              required
+            />
+          </div>
+          <div className={styles.formGroup}>
+            <label>Age</label>
+            <input
+              type="number"
+              value={member.age}
+              onChange={e => {
+                const updated = [...formData.familyMembers];
+                updated[idx].age = e.target.value;
+                setFormData(f => ({ ...f, familyMembers: updated }));
+              }}
+              placeholder="Age"
+              min="0"
+              required
+            />
+          </div>
+          <div className={styles.formGroup}>
+            <label>Contact</label>
+            <input
+              type="text"
+              value={member.contact}
+              onChange={e => {
+                const updated = [...formData.familyMembers];
+                updated[idx].contact = e.target.value;
+                setFormData(f => ({ ...f, familyMembers: updated }));
+              }}
+              placeholder="Contact"
+            />
+          </div>
+          <div className={styles.formGroup}>
+            <label>Employed?</label>
+            <select
+              value={member.employed}
+              onChange={e => {
+                const updated = [...formData.familyMembers];
+                updated[idx].employed = e.target.value;
+                setFormData(f => ({ ...f, familyMembers: updated }));
+              }}
+            >
+              <option value="No">No</option>
+              <option value="Yes">Yes</option>
+            </select>
+          </div>
+          <button type="button" onClick={() => {
+            const updated = formData.familyMembers.filter((_, i) => i !== idx);
+            setFormData(f => ({ ...f, familyMembers: updated.length ? updated : [{ name: '', age: '', contact: '', employed: 'No' }] }));
+          }} style={{ marginLeft: 8 }} disabled={formData.familyMembers.length === 1}>Remove</button>
+        </div>
+      ))}
+      <button type="button" onClick={() => setFormData(f => ({ ...f, familyMembers: [...f.familyMembers, { name: '', age: '', contact: '', employed: 'No' }] }))}>Add Family Member</button>
     </div>
   );
 
@@ -450,16 +492,8 @@ export default function SurveyForm({ setIsLoading }) {
           </select>
         </div>
         <div className={styles.formGroup}>
-          <label>Will you pay ₹1500 for food delivery?</label>
+          <label>Will you pay for food delivery?</label>
           <select name="willPayForFoodDelivery" value={formData.willPayForFoodDelivery} onChange={handleInputChange}>
-            <option value="">Select</option>
-            <option value="Yes">Yes</option>
-            <option value="No">No</option>
-          </select>
-        </div>
-        <div className={styles.formGroup}>
-          <label>Will you take it if it is free?</label>
-          <select name="willTakeFoodIfFree" value={formData.willTakeFoodIfFree} onChange={handleInputChange}>
             <option value="">Select</option>
             <option value="Yes">Yes</option>
             <option value="No">No</option>
@@ -617,9 +651,11 @@ export default function SurveyForm({ setIsLoading }) {
           <label>Caste</label>
           <select name="caste" value={formData.caste} onChange={handleInputChange}>
             <option value="">Select</option>
-            <option value="FC">FC</option>
+            <option value="OC">OC</option>
             <option value="BC">BC</option>
             <option value="SC">SC</option>
+            <option value="ST">ST</option>
+            <option value="Minority">Minority</option>
             <option value="Prefer not to say">Prefer not to say</option>
           </select>
         </div>

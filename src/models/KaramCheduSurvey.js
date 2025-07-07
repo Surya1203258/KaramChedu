@@ -1,5 +1,12 @@
 import mongoose from 'mongoose';
 
+const FamilyMemberSchema = new mongoose.Schema({
+  name: { type: String, trim: true },
+  age: { type: Number },
+  contact: { type: String, trim: true },
+  employed: { type: String, enum: ['Yes', 'No'], default: 'No' }
+}, { _id: false });
+
 const KaramCheduSurveySchema = new mongoose.Schema({
   fullName: { type: String, trim: true },
   contactNumber: { type: String, trim: true },
@@ -8,6 +15,7 @@ const KaramCheduSurveySchema = new mongoose.Schema({
   childrenUnder18: { type: Number, default: 0 },
   elderlyAbove65: { type: Number, default: 0 },
   disabledMembers: { type: Number, default: 0 },
+  familyMembers: [FamilyMemberSchema],
   childrenInSchool: { type: Number, default: 0 },
   childrenDroppedOut: { type: Number, default: 0 },
   educationHelpNeeded: { type: String, default: 'No' },
@@ -44,14 +52,12 @@ const KaramCheduSurveySchema = new mongoose.Schema({
   numberOfElderlyAbove65: { type: Number, default: 0 },
   willTakeFoodDelivery: { type: String },
   willPayForFoodDelivery: { type: String },
-  willTakeFoodIfFree: { type: String },
   needsMedicineDeliveryHelp: { type: String },
   needsHospitalVisitHelp: { type: String },
   needsHealthCheckupHelp: { type: String },
   helpOpeningFixedDeposit: { type: String },
   helpTakingLoan: { type: String },
-  helpWithDigitalPayments: { type: String },
-  familyMemberNames: [{ type: String, trim: true }]
+  helpWithDigitalPayments: { type: String }
 }, { timestamps: true });
 
 export default mongoose.models.KaramCheduSurvey || mongoose.model('KaramCheduSurvey', KaramCheduSurveySchema, 'VillageSurvey2024'); 
