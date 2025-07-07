@@ -16,6 +16,20 @@ export default function SurveyList() {
   });
   const [selectedSurvey, setSelectedSurvey] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [password, setPassword] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+
+  const handlePasswordSubmit = (e) => {
+    e.preventDefault();
+    if (password === '121212') {
+      setIsAuthenticated(true);
+      setPasswordError('');
+    } else {
+      setPasswordError('Incorrect password. Please try again.');
+      setPassword('');
+    }
+  };
 
   const fetchSurveys = async () => {
     setLoading(true);
@@ -41,8 +55,10 @@ export default function SurveyList() {
   };
 
   useEffect(() => {
-    fetchSurveys();
-  }, [currentPage, filters]);
+    if (isAuthenticated) {
+      fetchSurveys();
+    }
+  }, [currentPage, filters, isAuthenticated]);
 
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
@@ -116,6 +132,31 @@ export default function SurveyList() {
     }
   };
 
+  if (!isAuthenticated) {
+    return (
+      <div className={styles.authContainer}>
+        <div className={styles.authCard}>
+          <h2>🔒 Access Survey Data</h2>
+          <p>Please enter the password to view survey responses</p>
+          <form onSubmit={handlePasswordSubmit} className={styles.authForm}>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Enter password"
+              className={styles.passwordInput}
+              required
+            />
+            {passwordError && <div className={styles.passwordError}>{passwordError}</div>}
+            <button type="submit" className={styles.authButton}>
+              Access Data
+            </button>
+          </form>
+        </div>
+      </div>
+    );
+  }
+
   if (loading) {
     return (
       <div className={styles.loadingContainer}>
@@ -133,6 +174,12 @@ export default function SurveyList() {
           <span>Total: {surveys.length}</span>
           <span>Page {currentPage} of {totalPages}</span>
         </div>
+        <button 
+          onClick={() => setIsAuthenticated(false)} 
+          className={styles.logoutButton}
+        >
+          🔒 Logout
+        </button>
       </div>
 
       {/* Filters */}

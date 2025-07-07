@@ -45,6 +45,11 @@ export default function SurveyForm({ setIsLoading }) {
     employmentHelpNeeded: 'No',
     employmentHelpType: 'None',
     
+    // New Employment Section
+    openToSkillsDevelopment: '',
+    openToVocationalTraining: '',
+    willingToRelocate: '',
+    
     // Bank Information
     bankAccount: 'No',
     
@@ -163,6 +168,9 @@ export default function SurveyForm({ setIsLoading }) {
           monthlyIncome: 0,
           employmentHelpNeeded: 'No',
           employmentHelpType: 'None',
+          openToSkillsDevelopment: '',
+          openToVocationalTraining: '',
+          willingToRelocate: '',
           bankAccount: 'No',
           surveyorName: '',
           notes: '',
@@ -625,6 +633,49 @@ export default function SurveyForm({ setIsLoading }) {
           />
         </div>
       )}
+
+      <h3>Employment Section</h3>
+      <div className={styles.formGrid}>
+        <div className={styles.formGroup}>
+          <label>Are you open to skills development course for Employment?</label>
+          <select
+            name="openToSkillsDevelopment"
+            value={formData.openToSkillsDevelopment}
+            onChange={handleInputChange}
+          >
+            <option value="">Select</option>
+            <option value="Yes">Yes</option>
+            <option value="No">No</option>
+            <option value="Maybe">Maybe</option>
+          </select>
+        </div>
+        <div className={styles.formGroup}>
+          <label>Are you open to Vocational training Programmes?</label>
+          <select
+            name="openToVocationalTraining"
+            value={formData.openToVocationalTraining}
+            onChange={handleInputChange}
+          >
+            <option value="">Select</option>
+            <option value="Yes">Yes</option>
+            <option value="No">No</option>
+            <option value="Maybe">Maybe</option>
+          </select>
+        </div>
+        <div className={styles.formGroup}>
+          <label>Are you willing to relocate to any other city for employment?</label>
+          <select
+            name="willingToRelocate"
+            value={formData.willingToRelocate}
+            onChange={handleInputChange}
+          >
+            <option value="">Select</option>
+            <option value="Yes">Yes</option>
+            <option value="No">No</option>
+            <option value="Maybe">Maybe</option>
+          </select>
+        </div>
+      </div>
     </div>
   );
 

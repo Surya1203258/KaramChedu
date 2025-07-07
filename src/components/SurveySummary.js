@@ -5,6 +5,20 @@ export default function SurveySummary() {
   const [summary, setSummary] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedPeriod, setSelectedPeriod] = useState('all');
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [password, setPassword] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+
+  const handlePasswordSubmit = (e) => {
+    e.preventDefault();
+    if (password === '121212') {
+      setIsAuthenticated(true);
+      setPasswordError('');
+    } else {
+      setPasswordError('Incorrect password. Please try again.');
+      setPassword('');
+    }
+  };
 
   const fetchSummary = async () => {
     setLoading(true);
@@ -23,8 +37,35 @@ export default function SurveySummary() {
   };
 
   useEffect(() => {
-    fetchSummary();
-  }, [selectedPeriod]);
+    if (isAuthenticated) {
+      fetchSummary();
+    }
+  }, [selectedPeriod, isAuthenticated]);
+
+  if (!isAuthenticated) {
+    return (
+      <div className={styles.authContainer}>
+        <div className={styles.authCard}>
+          <h2>🔒 Access Summary Report</h2>
+          <p>Please enter the password to view survey summary</p>
+          <form onSubmit={handlePasswordSubmit} className={styles.authForm}>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Enter password"
+              className={styles.passwordInput}
+              required
+            />
+            {passwordError && <div className={styles.passwordError}>{passwordError}</div>}
+            <button type="submit" className={styles.authButton}>
+              Access Report
+            </button>
+          </form>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
@@ -57,17 +98,25 @@ export default function SurveySummary() {
     <div className={styles.surveySummary}>
       <div className={styles.summaryHeader}>
         <h2>Survey Summary Dashboard</h2>
-        <div className={styles.periodSelector}>
-          <select
-            value={selectedPeriod}
-            onChange={(e) => setSelectedPeriod(e.target.value)}
-            className={styles.periodSelect}
+        <div className={styles.headerControls}>
+          <div className={styles.periodSelector}>
+            <select
+              value={selectedPeriod}
+              onChange={(e) => setSelectedPeriod(e.target.value)}
+              className={styles.periodSelect}
+            >
+              <option value="all">All Time</option>
+              <option value="this_month">This Month</option>
+              <option value="last_month">Last Month</option>
+              <option value="this_week">This Week</option>
+            </select>
+          </div>
+          <button 
+            onClick={() => setIsAuthenticated(false)} 
+            className={styles.logoutButton}
           >
-            <option value="all">All Time</option>
-            <option value="this_month">This Month</option>
-            <option value="last_month">Last Month</option>
-            <option value="this_week">This Week</option>
-          </select>
+            🔒 Logout
+          </button>
         </div>
       </div>
 
